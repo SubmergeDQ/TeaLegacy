@@ -1,0 +1,41 @@
+// ============================================================
+// Oil UI 设计令牌（SCSS 层）
+// 所有组件样式从这里取值；同名 CSS 变量在 base.scss 的 :root
+// 重复一份，供运行时引用。数值为 375 设计稿 px，
+// 由 postcss-pxtorem 统一换算（1px 细线除外）。
+// ============================================================
+
+// —— 色彩：宣纸底 + 墨绿（品牌/选中）+ 茶褐（动作/价格）——
+$o-paper: #f6f2ea; // 宣纸底色
+$o-card: #fcfaf5; // 卡面
+$o-ink: #2f4f4f; // 墨绿
+$o-ink-deep: #24393a; // 墨绿按下
+$o-primary: #6b4226; // 茶褐：主动作与价格
+$o-primary-deep: #59371e; // 茶褐按下
+$o-title: #322c23; // 标题墨色
+$o-text: #4a443a; // 正文
+$o-muted: #6e6757; // 辅助信息
+$o-line: #e7e0d2; // 细线
+$o-disabled: #c9c2b2; // 禁用
+$o-on-ink: #f3eee3; // 墨绿/深底上的文字
+$o-mask: rgba(28, 25, 18, 0.52); // 遮罩
+
+// —— 字体 ——
+$o-font-serif: 'Noto Serif SC Variable', 'Noto Serif SC', 'Songti SC',
+  'STSong', 'SimSun', serif;
+$o-font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC',
+  'HarmonyOS Sans SC', 'MiSans', 'Microsoft YaHei', 'Helvetica Neue', Arial,
+  sans-serif;
+
+// —— 圆角 ——
+$o-radius-card: 16px;
+$o-radius-img: 12px;
+$o-radius-btn: 10px;
+
+// —— 阴影：仅浮层（Toast/Dialog）用一层环境影，不靠阴影堆层次 ——
+$o-shadow-float: 0 6px 24px rgba(28, 25, 18, 0.16);
+
+// —— 动效：倒茶——流淌，减速无过冲 ——
+$o-ease-flow: cubic-bezier(0.22, 1, 0.36, 1);
+$o-dur-press: 120ms;
+$o-dur-state: 240ms;

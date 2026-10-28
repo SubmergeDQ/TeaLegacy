@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover：让页面铺满刘海屏，safe-area-inset-bottom 才有值 -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#2F4F4F" />
+    <meta name="description" content="茶承 TeaLegacy —— 普洱茶非遗文化数字化应用" />
+    <title>茶承 TeaLegacy · 普洱茶非遗</title>
+    <style>
+      /**
+       * 移动端适配 + 桌面预览样机
+       *
+       * 根字号决定整个 UI 的比例（配合 postcss-pxtorem）：
+       * - 手机 / PakePlus WebView：根字号 = 视口宽 / 375 × 16，
+       *   设计稿 375px 基准，各机型等比缩放，比例协调；
+       * - 宽屏（≥520px）：界面收成一台 390:844 的手机预览样机，
+       *   根字号跟着**壳宽**算（而不是视口宽），内容比例才不会放大失真。
+       * 100dvh 处理移动端动态视口；viewport-fit=cover 让 safe-area-inset-* 生效。
+       */
+      html {
+        height: 100%;
+        font-size: calc(100vw / 375 * 16);
+      }
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #22332f;
+        overscroll-behavior: none;
+      }
+      #app {
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        height: 100%;
+        height: 100dvh;
+        background: #f6f2ea;
+      }
+      @media (min-width: 520px) {
+        html {
+          /* 壳宽 = min(视口高 - 48, 900) × 390/844；根字号 = 壳宽 / 375 × 16 */
+          font-size: calc(min(calc(100vh - 48px), 900px) * 390 / 844 / 375 * 16);
+          font-size: calc(min(calc(100dvh - 48px), 900px) * 390 / 844 / 375 * 16);
+        }
+        body {
+          display: grid;
+          place-items: center;
+          padding: 24px 0;
+        }
+        /* 宽屏下呈一台手机预览样机，比例与真机一致（390×844）；
+           手机与 PakePlus WebView 内不受影响 */
+        #app {
+          height: min(calc(100vh - 48px), 900px);
+          height: min(calc(100dvh - 48px), 900px);
+          width: auto;
+          aspect-ratio: 390 / 844;
+          border-radius: 22px;
+          overflow: hidden;
+          box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.07),
+            0 24px 70px rgba(0, 0, 0, 0.45);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+// ============================================================
+// 全局基础样式：reset、CSS 变量、加购飞入的小圆点
+// ============================================================
+
+:root {
+  --o-paper: #f6f2ea;
+  --o-card: #fcfaf5;
+  --o-ink: #2f4f4f;
+  --o-ink-deep: #24393a;
+  --o-primary: #6b4226;
+  --o-primary-deep: #59371e;
+  --o-title: #322c23;
+  --o-text: #4a443a;
+  --o-muted: #6e6757;
+  --o-line: #e7e0d2;
+  --o-disabled: #c9c2b2;
+  --o-on-ink: #f3eee3;
+  --o-mask: rgba(28, 25, 18, 0.52);
+  --o-font-serif: 'Noto Serif SC Variable', 'Noto Serif SC', 'Songti SC',
+    'STSong', 'SimSun', serif;
+  --o-font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'HarmonyOS Sans SC', 'MiSans', 'Microsoft YaHei', 'Helvetica Neue', Arial,
+    sans-serif;
+  --o-radius-card: 0.875rem;
+  --o-radius-img: 0.75rem;
+  --o-radius-btn: 0.625rem;
+  --o-shadow-float: 0 6px 24px rgba(28, 25, 18, 0.16);
+  --o-ease-flow: cubic-bezier(0.22, 1, 0.36, 1);
+  --o-dur-press: 120ms;
+  --o-dur-state: 240ms;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--o-font-sans);
+  font-size: 0.875rem; // 14px 正文基准
+  line-height: 1.65;
+  color: var(--o-title);
+  background: #22332f;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+dl,
+dd {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+// 加购飞入的商品小图（由 utils/motion.ts 挂到 #app）
+.fly-dot {
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--o-primary);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 0 0 1.5px rgba(253, 251, 246, 0.9),
+    0 3px 10px rgba(59, 37, 22, 0.35);
+  z-index: 90;
+  pointer-events: none;
+}
+
+// 尊重系统的"减少动态效果"：所有状态直接到位
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
