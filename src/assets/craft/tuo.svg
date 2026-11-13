@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-label="棉纸包裹的熟普沱茶">
+  <defs>
+    <radialGradient id="tuoWash" cx="50%" cy="50%" r="50%">
+      <stop offset="58%" stop-color="#6B4226" stop-opacity="0" />
+      <stop offset="100%" stop-color="#6B4226" stop-opacity="0.13" />
+    </radialGradient>
+  </defs>
+
+  <circle cx="150" cy="150" r="130" fill="url(#tuoWash)" />
+  <ellipse cx="150" cy="228" rx="82" ry="9" fill="#2F4F4F" opacity="0.08" />
+
+  <!-- 沱身：上小下大的碗形，棉纸包裹 -->
+  <path
+    d="M66 214 A 84 84 0 0 1 234 214 Z"
+    fill="#F0E4C9"
+    stroke="#2F4F4F"
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+
+  <!-- 顶窝 -->
+  <ellipse cx="150" cy="134" rx="32" ry="11" fill="#EDE6D4" stroke="#2F4F4F" stroke-width="1.6" />
+  <ellipse cx="150" cy="132" rx="11" ry="4" fill="#E2D8C0" stroke="#2F4F4F" stroke-width="1.1" opacity="0.9" />
+
+  <!-- 棉纸褶 -->
+  <g stroke="#2F4F4F" stroke-width="1.1" fill="none" opacity="0.3" stroke-linecap="round">
+    <path d="M150 145 L150 214" />
+    <path d="M126 145 L96 208" />
+    <path d="M174 145 L204 208" />
+    <path d="M104 155 L74 196" />
+    <path d="M196 155 L226 196" />
+    <path d="M80 208 q70 12 140 0" />
+  </g>
+
+  <!-- 落款：茶承印 -->
+  <g transform="rotate(5 150 182)">
+    <rect x="127" y="160" width="46" height="46" rx="4" fill="none" stroke="#6B4226" stroke-width="2" />
+    <text
+      x="150"
+      y="195"
+      text-anchor="middle"
+      font-family="'Noto Serif SC', 'Songti SC', 'SimSun', serif"
+      font-size="25"
+      fill="#6B4226"
+    >承</text>
+  </g>
+
+  <!-- 茶席 -->
+  <path d="M44 226 Q150 240 256 226" fill="none" stroke="#2F4F4F" stroke-width="1.2" opacity="0.22" />
+</svg>

@@ -7,15 +7,24 @@ import OButton from '@/components/oil-ui/OButton.vue'
 import OIcon from '@/components/oil-ui/OIcon.vue'
 import ONavBar from '@/components/oil-ui/ONavBar.vue'
 import { showToast } from '@/components/oil-ui/toast'
-import { getProduct } from '@/mock/mockData'
+import { getCraftByProduct } from '@/catalog/craft'
+import { getProduct } from '@/catalog/shop'
 import { useCartStore } from '@/stores/cart'
+import { useCraftStore } from '@/stores/craft'
 import { formatPrice } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
+const craft = useCraftStore()
 
 const product = computed(() => getProduct(Number(route.params.id)))
+
+// 这款茶能不能"亲手做"：能，且已经做过，就在详情页留一行记录
+const craftTea = computed(() =>
+  product.value ? getCraftByProduct(product.value.id) : undefined,
+)
+const crafted = computed(() => (craftTea.value ? craft.done(craftTea.value.id) : false))
 
 // 引言：叙事第一段的首句，压在规格表之前，让首屏有一句只能在此读到的来历
 const lead = computed(() => {
@@ -78,6 +87,17 @@ function addToCart() {
 
     <!-- 器物出处 -->
     <p class="pd__source">{{ product.source }}</p>
+
+    <!-- 制茶记录：做过这一款，就可以再做一遍 -->
+    <button
+      v-if="craftTea && crafted"
+      class="pd__craft"
+      @click="router.push(`/craft/${craftTea.id}`)"
+    >
+      <span class="pd__craft-seal" aria-hidden="true">承</span>
+      <span class="pd__craft-text">你已亲手制成这款茶</span>
+      <span class="pd__craft-go">再做一遍</span>
+    </button>
 
     <dl class="pd__specs">
       <div v-for="s in product.specs" :key="s.label" class="pd__spec">
@@ -207,13 +227,59 @@ function addToCart() {
   color: var(--o-muted);
 }
 
+// 制茶记录：一行窄卡，一枚小印领起
+.pd__craft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: calc(100% - 2rem);
+  margin: 0.75rem 1rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--o-line);
+  border-radius: 0.5rem;
+  background: var(--o-card);
+  text-align: left;
+  transition: transform var(--o-dur-press) var(--o-ease-flow);
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.pd__craft-seal {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--o-primary);
+  border-radius: 0.125rem;
+  font-family: var(--o-font-serif);
+  font-size: 0.5625rem;
+  line-height: 1;
+  color: var(--o-primary);
+}
+
+.pd__craft-text {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--o-text);
+}
+
+.pd__craft-go {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--o-primary);
+}
+
 .pd__specs {
   margin: 0.75rem 1rem 0;
   padding: 0.25rem 1rem;
   background: var(--o-card);
   border-radius: var(--o-radius-card);
 }
-
 .pd__spec {
   display: flex;
   justify-content: space-between;
@@ -268,7 +334,7 @@ function addToCart() {
   align-items: center;
   gap: 1rem;
   padding: 0.625rem 1rem;
-  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(0.625rem + var(--o-safe-bottom));
   background: var(--o-card);
   border-top: 1px solid var(--o-line);
   z-index: 20;

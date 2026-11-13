@@ -1,0 +1,71 @@
+// ============================================================
+// 工序图版的共用笔法
+//
+// 所有场景组件共用这套线条与色值：墨绿 1.5px 线、宣纸底、
+// 茶褐只出现在茶汤与火色上。场景组件里只画自己的形状。
+// ============================================================
+
+.scene {
+  // 绝对定位：图版高度只由父级决定，
+  // 否则 SVG 的固有比例会把容器顶高
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.s-line {
+  fill: none;
+  stroke: var(--o-ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.s-thin {
+  stroke-width: 1.1;
+}
+
+.s-faint {
+  opacity: 0.22;
+}
+
+.s-paper {
+  fill: #f3ecdc;
+}
+
+.s-leaf {
+  fill: #dfe4cc;
+  stroke: var(--o-ink);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+  transition:
+    opacity 300ms var(--o-ease-flow),
+    transform 320ms var(--o-ease-flow);
+}
+
+.s-leaf-dark {
+  fill: #7d6a3c;
+  stroke: var(--o-ink);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+}
+
+.s-wok {
+  fill: #ece3d2;
+  stroke: var(--o-ink);
+}
+
+.s-tea-wash {
+  fill: #7a4a28;
+  fill-opacity: 0.28;
+}
+
+.s-dash {
+  fill: none;
+  stroke: #6b4226;
+  stroke-width: 1.2;
+  stroke-dasharray: 5 6;
+  opacity: 0.45;
+}

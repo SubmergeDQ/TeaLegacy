@@ -10,15 +10,15 @@ const route = useRoute()
 const router = useRouter()
 
 const tabItems: TabItem[] = [
-  { key: 'culture', icon: 'tea', label: '文化' },
+  { key: 'craft', icon: 'tea', label: '制茶' },
   { key: 'shop', icon: 'jar', label: '商城' },
 ]
 
-// 仅一级 Tab 页显示底部导航；购物车、详情为全屏次级页
+// 仅一级 Tab 页显示底部导航；购物车、详情、制作页为全屏次级页
 const showTabbar = computed(() => route.meta.tab !== undefined)
 const activeTab = computed({
-  get: () => (route.meta.tab as string) ?? 'shop',
-  set: (key) => router.push(key === 'shop' ? '/shop' : '/culture'),
+  get: () => (route.meta.tab as string) ?? 'craft',
+  set: (key) => router.push(key === 'shop' ? '/shop' : '/craft'),
 })
 
 // 页面转场与滚动记忆：进次级页从右滑入、返回反向、Tab 间淡换；
@@ -52,7 +52,7 @@ watch(
     <main ref="bodyEl" class="app-body">
       <router-view v-slot="{ Component }">
         <transition :name="transitionName">
-          <keep-alive include="ShopView,CultureView">
+          <keep-alive include="ShopView,CraftSelectView">
             <component :is="Component" />
           </keep-alive>
         </transition>
@@ -71,6 +71,8 @@ watch(
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  // 顶部让出状态栏：整块壳统一处理，避免各页面各自补 env() 时漏掉一级页
+  padding-top: var(--o-safe-top);
   background: var(--o-paper);
 }
 

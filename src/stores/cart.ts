@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getProduct, type Product } from '@/mock/mockData'
+import { getProduct, type Product } from '@/catalog/shop'
 
 export interface CartLine {
   id: number

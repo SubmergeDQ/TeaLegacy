@@ -1,19 +1,26 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import CultureView from '@/views/CultureView.vue'
+import CraftSelectView from '@/views/CraftSelectView.vue'
 import ShopView from '@/views/ShopView.vue'
 
 // 一级 Tab 页（meta.tab 标记）与次级页（meta.depth: 2）。
 // 次级页隐藏 TabBar、全屏展示；hash 模式便于 PakePlus 直接打包。
+// 产品主线：先制茶（/craft），再把做好的茶带走（/shop）。
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', redirect: '/shop' },
+    { path: '/', redirect: '/craft' },
     {
-      path: '/culture',
-      name: 'culture',
-      component: CultureView,
-      meta: { tab: 'culture', depth: 1 },
+      path: '/craft',
+      name: 'craft',
+      component: CraftSelectView,
+      meta: { tab: 'craft', depth: 1 },
+    },
+    {
+      path: '/craft/:id',
+      name: 'craft-make',
+      component: () => import('@/views/CraftMakeView.vue'),
+      meta: { depth: 2 },
     },
     {
       path: '/shop',
@@ -33,7 +40,7 @@ const router = createRouter({
       component: () => import('@/views/CartView.vue'),
       meta: { depth: 2 },
     },
-    { path: '/:pathMatch(.*)*', redirect: '/shop' },
+    { path: '/:pathMatch(.*)*', redirect: '/craft' },
   ],
 })
 

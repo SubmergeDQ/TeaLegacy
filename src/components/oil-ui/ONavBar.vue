@@ -26,7 +26,6 @@ const emit = defineEmits<{ back: [] }>()
   align-items: center;
   height: 3rem;
   padding: 0 0.5rem;
-  padding-top: env(safe-area-inset-top);
   background: var(--o-paper);
   border-bottom: 1px solid var(--o-line);
   z-index: 20;

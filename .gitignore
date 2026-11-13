@@ -6,6 +6,7 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+release/
 
 # 编辑器与系统
 .vscode/*
@@ -26,3 +27,4 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+/.workbuddy

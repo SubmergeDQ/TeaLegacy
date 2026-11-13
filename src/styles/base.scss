@@ -1,6 +1,9 @@
 // ============================================================
 // 全局基础样式：reset、CSS 变量、加购飞入的小圆点
+// 工序图版的共用笔法在 scene.scss（scenes/ 下的组件共用）
 // ============================================================
+
+@use './scene';
 
 :root {
   --o-paper: #f6f2ea;
@@ -28,6 +31,11 @@
   --o-ease-flow: cubic-bezier(0.22, 1, 0.36, 1);
   --o-dur-press: 120ms;
   --o-dur-state: 240ms;
+
+  // 系统栏安全区：Capacitor 8 在原生壳里把真实高度写进 --safe-area-inset-*，
+  // 浏览器与旧版 WebView 没有该变量时退回 env()；桌面浏览器两者都是 0。
+  --o-safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --o-safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 }
 
 * {

@@ -6,7 +6,7 @@ import OBadge from '@/components/oil-ui/OBadge.vue'
 import OIcon from '@/components/oil-ui/OIcon.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import ProductCard from '@/components/shop/ProductCard.vue'
-import { banner, getProduct, products } from '@/mock/mockData'
+import { banner, getProduct, products } from '@/catalog/shop'
 import { useCartStore } from '@/stores/cart'
 import { bump, flyToCart } from '@/utils/motion'
 

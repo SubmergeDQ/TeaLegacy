@@ -48,14 +48,14 @@ const indicatorLeft = computed(
   display: flex;
   background: var(--o-card);
   border-top: 1px solid var(--o-line);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: var(--o-safe-bottom);
   z-index: 20;
 }
 
 .o-tabbar__indicator {
   position: absolute;
-  // 挂在选中项文字下方，归属明确；跨项移动时仍是同一块
-  bottom: calc(0.4375rem + env(safe-area-inset-bottom));
+  // 底部单独留一条窄带放指示条，不再压住文字
+  bottom: calc(0.25rem + var(--o-safe-bottom));
   width: 1rem;
   height: 0.125rem;
   border-radius: 999px;
@@ -71,7 +71,8 @@ const indicatorLeft = computed(
   align-items: center;
   justify-content: center;
   gap: 0.125rem;
-  height: 3.25rem;
+  // 上留白 + 下方 0.625rem 的指示条带：图标与文字都落在带子之上
+  padding: 0.3125rem 0 0.625rem;
   color: var(--o-muted);
   transition: color var(--o-dur-state) var(--o-ease-flow);
 

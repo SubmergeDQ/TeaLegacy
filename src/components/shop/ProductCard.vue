@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Product } from '@/mock/mockData'
+import type { Product } from '@/catalog/shop'
 import OIcon from '@/components/oil-ui/OIcon.vue'
 import { formatPrice } from '@/utils/format'
 

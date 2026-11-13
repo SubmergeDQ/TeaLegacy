@@ -16,7 +16,7 @@ function onAction() {
       v-if="toastState.visible"
       class="o-toast"
       role="status"
-      :style="{ top: `calc(${topOffset} + env(safe-area-inset-top))` }"
+      :style="{ top: `calc(${topOffset} + var(--o-safe-top))` }"
     >
       <span class="o-toast__text">{{ toastState.text }}</span>
       <button v-if="toastState.action" class="o-toast__action" @click="onAction">

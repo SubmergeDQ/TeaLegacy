@@ -1,8 +1,11 @@
 # 茶承 TeaLegacy
 
-以「普洱茶非遗文化」为主题的移动端优先 H5 应用，后续可经 [PakePlus](https://github.com/Sjj1024/PakePlus) 打包为 App。
+以「普洱茶非遗文化」为主题的移动端优先 H5 应用，用 Capacitor 打包为 Android APK（原生工程在 `android/`）。
 
-当前版本是高保真前端演示版：商城模块（商品列表 / 详情 / 购物车 / 模拟结算）完整可用，文化模块为占位页。
+当前版本是高保真前端演示版，主线是「先做一遍，再买一饼」：
+
+1. **制茶**：选一款茶（生茶饼 / 小青柑 / 熟普沱茶）→ 五步互动工序（轻点、按住、拖动、选择）→ 成茶票签 → 当场带走同款；
+2. **商城**：商品列表 / 详情 / 购物车 / 模拟结算完整可用，详情页会显示「你已亲手制成这款茶」。
 
 ## 技术栈
 
@@ -12,10 +15,11 @@
 | 构建 | Vite 7 |
 | 语言 | TypeScript（`vue-tsc` 严格模式检查） |
 | 路由 | Vue Router 4（hash 模式，便于 WebView 打包） |
-| 状态 | Pinia（购物车，localStorage 持久化） |
+| 状态 | Pinia（购物车 + 制茶记录，均 localStorage 持久化） |
 | 样式 | SCSS + 设计令牌（CSS 变量 + SCSS 变量） |
 | UI 组件 | **Oil UI**（项目内置 Vue 3 组件库，见下节） |
-| 适配 | postcss-pxtorem（375 设计稿基准）+ `safe-area-inset-bottom` |
+| 图形 | 内联 SVG 线稿（24 viewBox 图标 + 320×240 工序场景 + 300×300 茶样） |
+| 适配 | postcss-pxtorem（375 设计稿基准）+ 统一安全区令牌（`--o-safe-top` / `--o-safe-bottom`） |
 | 字体 | Noto Serif SC Variable（`@fontsource-variable`，本地托管、按字符分片按需加载） |
 
 ## 快速开始
@@ -32,6 +36,23 @@ npm run typecheck  # vue-tsc 类型检查
 npm run build      # 类型检查 + 生产构建（产物在 dist/）
 npm run preview    # 预览生产构建
 ```
+
+## 制茶体验
+
+入口是一级 Tab「制茶」，也是默认首页。三款茶样各五步，每步一种互动；互动只上报 0–1 的进度，工序图版据此刻画变化。
+
+| 互动 | 控件 | 用在哪几步 |
+| --- | --- | --- |
+| `tap` | 底部控制条，轻点计数 | 采青、选果、翻堆 |
+| `hold` | 按住不放，控制条底部细线走完即完成 | 杀青、挖果、生晒、渥堆、蒸压 |
+| `swipe` | 在控制条上左右拖动（也可连点、键盘） | 萎凋、揉捻、解块 |
+| `choose` | 两张选项卡，决定成茶风味 | 填茶、定形 |
+
+- **模块化数据**：`src/catalog/craft/teas/` 下**一款互动产品一个模块**，每个模块只描述自己的茶样、步骤文案、互动参数与选项风味；新增一款茶只需新建模块，再在 `src/catalog/craft/index.ts` 登记一行，页面无需改动。
+- **工序场景**：`src/components/craft/scenes/` 下**每种工序图版一个组件**（茶枝与竹篓、竹筛、铁锅、竹席茶团、石磨、柑果、日晒、茶堆），共用笔法在 `src/styles/scene.scss`；`CraftScene.vue` 只按 `scene` key 调度，`progress` 驱动叶片离枝、摊开、转暗、压饼等变化；不画火苗，只在锅底铺一层随按住渐浓的暖光。
+- **成茶**：五步走完出「茶样票签」——茶样图、风味（茶样自带 + 每步选择所得）、评语、工序回顾、价格；可当场加购、查看茶品，或「再做一款」回选茶页。
+- **记录**：成茶写入 localStorage（键 `tea-legacy.craft.v1`）。选茶页据此显示「已制成」，商品详情页显示「你已亲手制成这款茶」。
+- **无障碍**：轻点与选择是原生按钮；按住支持空格 / 回车；拖动同时接受轻点与键盘操作。
 
 ## Oil UI 的安装与引入方式
 
@@ -132,9 +153,21 @@ TeaLegacy/
    ├─ router/
    │  └─ index.ts              # 路由表（一级 Tab / 二级全屏页）
    ├─ stores/
-   │  └─ cart.ts               # Pinia 购物车（增删改、合计、localStorage 持久化）
-   ├─ mock/
-   │  └─ mockData.ts           # 全部 Mock 数据：8 件茶品 + 器物出处
+   │  ├─ cart.ts               # Pinia 购物车（增删改、合计、localStorage 持久化）
+   │  └─ craft.ts              # Pinia 制茶记录（已制成、成茶风味，localStorage 持久化）
+   ├─ catalog/                  # ★ 内容模块：商品与互动产品
+   │  ├─ craft/
+   │  │  ├─ index.ts            #    互动产品汇总（craftTeas / getCraftTea / getCraftByProduct）
+   │  │  ├─ types.ts            #    茶样、步骤、互动与选项的类型
+   │  │  └─ teas/               #    一款互动产品一个模块
+   │  │     ├─ sheng-bing.ts    #      老班章生茶饼
+   │  │     ├─ xiao-qing-gan.ts #      新会小青柑
+   │  │     └─ shou-tuo.ts      #      熟普沱茶
+   │  └─ shop/
+   │     ├─ index.ts            #    商品汇总（products / getProduct / banner）
+   │     ├─ types.ts            #    商品类型
+   │     ├─ banner.ts           #    首屏主视觉
+   │     └─ products/           #    一件商品一个模块（10 件）
    ├─ components/
    │  ├─ oil-ui/               # ★ Oil UI 组件库
    │  │  ├─ index.ts           #    插件入口
@@ -142,22 +175,34 @@ TeaLegacy/
    │  │  ├─ OStepper.vue  ODialog.vue  OToastHost.vue  OIcon.vue
    │  │  ├─ icons.ts           #    自绘图标路径
    │  │  └─ toast.ts           #    函数式提示
-   │  └─ shop/
-   │     ├─ ProductCard.vue    # 商品卡（含"本期主推"横排变体）
-   │     └─ CartSettleBar.vue  # 底部结算栏
+   │  ├─ shop/
+   │  │  ├─ ProductCard.vue    # 商品卡（含"本期主推"横排变体）
+   │  │  └─ CartSettleBar.vue  # 底部结算栏
+   │  └─ craft/
+   │     ├─ CraftScene.vue     # 工序图版调度：按 scene key 取对应组件
+   │     ├─ CraftControl.vue   # 四种互动控件（轻点 / 按住 / 拖动 / 选择）
+   │     └─ scenes/            # 每种工序图版一个组件 + 注册表
+   │        ├─ index.ts        #    场景注册表（garden / wither / wok ...）
+   │        ├─ GardenScene.vue  WitherScene.vue  WokScene.vue
+   │        ├─ RollScene.vue    PressScene.vue   CitrusScene.vue
+   │        ├─ SunScene.vue     PileScene.vue
+   │        └─ leaf.ts         #    全场共用的叶片路径
    ├─ views/
+   │  ├─ CraftSelectView.vue   # /craft       选茶页（一级 Tab，默认首页）
+   │  ├─ CraftMakeView.vue     # /craft/:id   五步制作 + 成茶票签
    │  ├─ ShopView.vue          # /shop        商城首页（主视觉 + 主推 + 双列网格）
-   │  ├─ ProductView.vue       # /shop/:id    商品详情
-   │  ├─ CartView.vue          # /cart        购物车 + 支付成功弹窗
-   │  └─ CultureView.vue       # /culture     文化占位页
+   │  ├─ ProductView.vue       # /shop/:id    商品详情（含"已亲手制成"记录）
+   │  └─ CartView.vue          # /cart        购物车 + 支付成功弹窗
    ├─ styles/
    │  ├─ variables.scss        # 设计令牌（SCSS）
-   │  └─ base.scss             # reset、CSS 变量、飞入动画样式
+   │  ├─ base.scss             # reset、CSS 变量（含安全区）、飞入动画样式
+   │  └─ scene.scss            # 工序图版共用线条样式
    ├─ utils/
    │  ├─ format.ts             # 价格千分位
    │  └─ motion.ts             # 加购飞入、徽标跳动、模拟延迟
    └─ assets/
-      └─ products/             # 器物图（8 张）+ SOURCES.md 许可记录
+      ├─ products/             # 器物图（8 张）+ SOURCES.md 许可记录
+      └─ craft/                # 茶样线稿（生茶饼 / 小青柑 / 熟普沱茶，自绘占位）
 ```
 
 ## 移动端适配
@@ -168,38 +213,71 @@ TeaLegacy/
 2. **根字号**（`index.html`）：
    - 手机 / PakePlus WebView：`font-size: calc(100vw / 375 * 16)`，各机型等比缩放；
    - 宽屏（≥520px）：界面收成 390:844 的手机样机，根字号跟着**壳宽**算，避免内容被放大失真。
-3. **安全区**：`viewport-fit=cover` + `env(safe-area-inset-bottom)` 用在 TabBar、结算栏、详情底栏与 Toast 的定位上。
+3. **安全区**：`viewport-fit=cover` + 统一令牌 `--o-safe-top` / `--o-safe-bottom`（Capacitor 8 注入的 `--safe-area-inset-*` 优先，浏览器退回 `env()`）。顶部由 `.app-shell` 统一让出状态栏，一级页与次级页都不会被系统栏压住；底部用于 TabBar、结算栏、详情底栏与 Toast。
 4. **动态视口**：`100dvh` 适配移动端浏览器地址栏伸缩。
 
 ## 路由
 
 | 路径 | 页面 | 说明 |
 | --- | --- | --- |
-| `/` | → `/shop` | 默认进入商城 |
+| `/` | → `/craft` | 默认进入制茶 |
+| `/craft` | 选茶页 | 一级 Tab，显示 TabBar |
+| `/craft/:id` | 五步制作 + 成茶 | 全屏次级页，隐藏 TabBar |
 | `/shop` | 商城首页 | 一级 Tab，显示 TabBar |
 | `/shop/:id` | 商品详情 | 全屏次级页，隐藏 TabBar |
 | `/cart` | 购物车 | 全屏次级页，隐藏 TabBar |
-| `/culture` | 文化占位页 | 一级 Tab，显示 TabBar |
 
 ## 交互与状态
 
+- **制茶**：选茶 → 五步互动（轻点 / 按住 / 拖动 / 选择）→ 成茶票签 → 加购或查看茶品；「再做一款」回选茶页。每步完成留 0.5 秒落定再翻页，进度不因松手清零。
 - **加购**：点商品卡上的「+」→ 商品小图沿弧线飞入右上购物车图标 → 徽标跳动 +1 → 提示「已加购「…」」并提供「去看看」入口。
 - **购物车**：数量加减（1–99，步进器）、删除（直接执行 + 6 秒内可撤销）、合计实时更新。
 - **结算**：点「去结算」→ 按钮进入「处理中」并禁用（防重复提交）→ 约 0.9 秒后弹「支付成功」，**同时清空购物车**；结果弹窗不可点遮罩关闭，点「好的」返回空购物车状态。
-- **持久化**：购物车写入 `localStorage`（键 `tea-legacy.cart.v1`），刷新或重启后读回；读回时过滤已下架商品。
+- **持久化**：购物车写入 `localStorage`（键 `tea-legacy.cart.v1`），制茶记录写入 `tea-legacy.craft.v1`；刷新或重启后读回，购物车读回时过滤已下架商品。
 - **无障碍**：触屏目标 ≥44px（部分通过伪元素扩展点击区）、弹窗 Esc 关闭与焦点归还、`prefers-reduced-motion` 下所有状态直接到位。
 
 ## Mock 数据
 
-全部在 `src/mock/mockData.ts`：8 件商品（1 款普洱生茶饼 + 7 件茶器），含名称、副题、价格、规格、茶品志、器物出处。商品图来自博物馆开放馆藏，逐条的来源与许可记录见 [`src/assets/products/SOURCES.md`](src/assets/products/SOURCES.md)，详情页展示出处；茶饼图为商品包装照（CC BY-SA 4.0，摄影 Ash Crow），已在界面与 SOURCES.md 署名，正式上线前建议替换为自有拍摄。
+- **商城**：`src/catalog/shop/products/`，一件商品一个模块（10 件：老班章生茶饼、新会小青柑、勐海熟普沱茶 + 7 件茶器），`src/catalog/shop/index.ts` 汇总陈列顺序；含名称、副题、价格、规格、茶品志、器物出处。器物图来自博物馆开放馆藏，逐条来源与许可见 [`src/assets/products/SOURCES.md`](src/assets/products/SOURCES.md)；茶饼图为商品包装照（CC BY-SA 4.0，摄影 Ash Crow），已在界面与 SOURCES.md 署名。
+- **制茶**：`src/catalog/craft/teas/`，一款互动产品一个模块（3 款 × 5 步），步骤文案为工艺示意，非严格教科书表述。
+- **占位素材**：小青柑、熟普沱茶没有实拍图，茶样用 `src/assets/craft/*.svg` 自绘线稿占位（项目无生图授权），界面与详情页均标注「示意茶样图 · 项目自绘占位」。正式上线建议替换为自有拍摄，与其余商品图统一。
 
-## 打包为 App
+## 打包为 APK
+
+原生壳用 Capacitor 8（`android/` 目录由 `npx cap add android` 生成），H5 产物直接打进 WebView，离线可用。
 
 ```bash
-npm run build     # 产物在 dist/
+npm run build                 # 1. 产出 dist/
+npx cap sync android          # 2. 把 dist 同步进 android/app/src/main/assets/public
+cd android && ./gradlew assembleDebug   # 3. 产出 APK
 ```
 
-用 PakePlus 时把站点地址指向 `dist/`（或部署后的地址）即可。路由用 hash 模式，无需服务端重写规则。当前提示、弹窗、安全区均已按 WebView 全屏形态处理；桌面样机样式只在 `min-width: 520px` 时生效，不影响 App 内显示。
+产物：`android/app/build/outputs/apk/debug/app-debug.apk`（也是 `release/TeaLegacy-1.0-debug.apk` 的来源）。
+
+构建环境要求：
+
+- **JDK 17–21**（本项目用 Temurin 21 验证过；JDK 24 与 AGP 8.13 不兼容，别用）
+- Android SDK：`compileSdk 36` / `minSdk 24` / `targetSdk 36`，需装 build-tools 36
+- 首次构建要联网下载 Gradle 与 AGP 依赖
+
+```bash
+export JAVA_HOME="$HOME/.gradle/jdks/jdk-21.0.12.1+1"
+export PATH="$JAVA_HOME/bin:$PATH"
+cd android && ./gradlew assembleDebug
+```
+
+原生侧改过的地方（重新 `cap add android` 会被覆盖，注意保留）：
+
+| 位置 | 改动 |
+| --- | --- |
+| `res/values/strings.xml` | 应用名改成「茶承」 |
+| `res/values/styles.xml` | 状态栏 / 导航栏 / 启动背景统一为宣纸色，浅色系统图标 |
+| `res/mipmap-*` | 应用图标（宣纸底 + 茶褐方印「承」） |
+| `src/main.ts` | 接管系统返回键：次级页回上一页，一级页才退出 |
+
+`appId` 是 `com.tealegacy.app`，版本号在 `android/app/build.gradle` 的 `versionCode` / `versionName`。
+
+调试版用 Android 的 debug 签名，可直接安装（需允许「未知来源」）；上架应用商店要另配 release 签名。
 
 ## 设计说明与过程记录
 

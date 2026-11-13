@@ -29,7 +29,7 @@ const emit = defineEmits<{ settle: [] }>()
   align-items: center;
   gap: 0.875rem;
   padding: 0.625rem 1rem;
-  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(0.625rem + var(--o-safe-bottom));
   background: var(--o-card);
   border-top: 1px solid var(--o-line);
   z-index: 20;
