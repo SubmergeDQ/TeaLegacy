@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-label="竹匾里摊着的普洱生散茶">
+  <defs>
+    <radialGradient id="looseRawWash" cx="50%" cy="50%" r="50%">
+      <stop offset="58%" stop-color="#6B4226" stop-opacity="0" />
+      <stop offset="100%" stop-color="#6B4226" stop-opacity="0.13" />
+    </radialGradient>
+  </defs>
+
+  <circle cx="150" cy="150" r="130" fill="url(#looseRawWash)" />
+  <ellipse cx="150" cy="246" rx="76" ry="8" fill="#2F4F4F" opacity="0.08" />
+
+  <!-- 竹匾 -->
+  <ellipse cx="150" cy="222" rx="96" ry="26" fill="#F3ECDC" stroke="#2F4F4F" stroke-width="2.4" />
+  <ellipse cx="150" cy="222" rx="84" ry="19" fill="none" stroke="#2F4F4F" stroke-width="1.1" opacity="0.3" />
+  <g stroke="#2F4F4F" stroke-width="1" opacity="0.16">
+    <path d="M58 214 H242" />
+    <path d="M64 230 H236" />
+  </g>
+
+  <!-- 茶堆：生散的条索偏青褐 -->
+  <path
+    d="M62 224 Q150 112 238 224 Z"
+    fill="#B3AA7F"
+    stroke="#2F4F4F"
+    stroke-width="2.6"
+    stroke-linejoin="round"
+  />
+  <g stroke="#4A443A" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5">
+    <path d="M86 210 q22 -20 44 -26" />
+    <path d="M104 214 q26 -16 52 -18" />
+    <path d="M128 208 q20 -14 40 -12" />
+    <path d="M154 212 q24 -14 44 -10" />
+    <path d="M176 210 q18 -10 32 -6" />
+    <path d="M96 196 q18 -14 34 -16" />
+    <path d="M142 190 q20 -12 36 -8" />
+    <path d="M178 192 q16 -8 28 -4" />
+    <path d="M118 182 q16 -10 30 -10" />
+    <path d="M158 176 q16 -8 28 -4" />
+  </g>
+  <g fill="#DEE4CB" stroke="#2F4F4F" stroke-width="1.1">
+    <path d="M74 210 q10 -8 20 -4 q-4 10 -20 4 z" />
+    <path d="M218 214 q-8 -10 -18 -6 q4 10 18 6 z" />
+    <path d="M206 228 q10 -8 20 -4 q-4 10 -20 4 z" />
+  </g>
+
+  <!-- 散落的条索 -->
+  <g stroke="#6B4226" stroke-width="1.6" fill="none" stroke-linecap="round">
+    <path d="M52 238 q14 -6 28 -2" />
+    <path d="M224 242 q12 -8 24 -6" />
+    <path d="M238 200 q10 2 16 10" />
+  </g>
+
+  <!-- 竹勺 -->
+  <g transform="rotate(-16 240 154)">
+    <path d="M212 166 q30 -12 58 0 q-8 18 -30 16 q-24 -2 -28 -16 z" fill="#EFE4CD" stroke="#2F4F4F" stroke-width="1.8" stroke-linejoin="round" />
+    <path d="M270 170 l 20 -8" fill="none" stroke="#2F4F4F" stroke-width="1.6" stroke-linecap="round" />
+  </g>
+
+  <!-- 茶签 -->
+  <g transform="rotate(-5 224 108)">
+    <rect x="206" y="88" width="36" height="48" rx="2" fill="#FCFAF5" stroke="#2F4F4F" stroke-width="1.4" />
+    <path d="M224 88 v -12" fill="none" stroke="#2F4F4F" stroke-width="1.2" />
+    <text x="224" y="108" text-anchor="middle" font-family="'Noto Serif SC', 'Songti SC', 'SimSun', serif" font-size="15" fill="#6B4226">生</text>
+    <text x="224" y="126" text-anchor="middle" font-family="'Noto Serif SC', 'Songti SC', 'SimSun', serif" font-size="15" fill="#6B4226">散</text>
+  </g>
+
+  <!-- 落款 -->
+  <g transform="rotate(-6 74 124)">
+    <rect x="58" y="108" width="32" height="32" rx="3" fill="none" stroke="#6B4226" stroke-width="1.8" />
+    <text x="74" y="132" text-anchor="middle" font-family="'Noto Serif SC', 'Songti SC', 'SimSun', serif" font-size="18" fill="#6B4226">承</text>
+  </g>
+
+  <path d="M42 250 Q150 262 258 250" fill="none" stroke="#2F4F4F" stroke-width="1.2" opacity="0.22" />
+</svg>

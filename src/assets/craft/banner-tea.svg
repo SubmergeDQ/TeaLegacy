@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="茶山、日头与一饼普洱的线稿">
+  <defs>
+    <linearGradient id="bannerPaper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F7F2E7" />
+      <stop offset="100%" stop-color="#EDE4D1" />
+    </linearGradient>
+    <radialGradient id="bannerSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E0BE80" stop-opacity="0.62" />
+      <stop offset="100%" stop-color="#E0BE80" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="600" fill="url(#bannerPaper)" />
+
+  <!-- 日头 -->
+  <circle cx="934" cy="152" r="150" fill="url(#bannerSun)" />
+  <circle cx="934" cy="152" r="78" fill="#E0BE80" fill-opacity="0.5" stroke="#2F4F4F" stroke-width="2" stroke-opacity="0.3" />
+
+  <!-- 远山：三层，越远越淡 -->
+  <path
+    d="M0 356 L 120 300 L 216 336 L 330 264 L 440 330 L 540 286 L 660 344 L 780 278 L 906 332 L 1030 282 L 1136 330 L 1200 300 V 600 H 0 Z"
+    fill="#2F4F4F"
+    fill-opacity="0.07"
+  />
+  <path
+    d="M0 420 L 150 356 L 268 400 L 396 340 L 520 398 L 650 350 L 790 404 L 930 344 L 1064 398 L 1200 352 V 600 H 0 Z"
+    fill="#2F4F4F"
+    fill-opacity="0.1"
+  />
+  <path
+    d="M0 494 L 160 438 L 306 482 L 468 428 L 620 480 L 780 432 L 950 486 L 1110 438 L 1200 468 V 600 H 0 Z"
+    fill="#2F4F4F"
+    fill-opacity="0.14"
+  />
+
+  <!-- 云与飞鸟 -->
+  <g fill="none" stroke="#2F4F4F" stroke-width="1.6" opacity="0.24" stroke-linecap="round">
+    <path d="M120 170 q44 -22 88 0 q44 -16 74 4" />
+    <path d="M700 118 q36 -18 72 0 q34 -12 58 2" />
+    <path d="M1010 84 q30 -14 60 0" />
+    <path d="M820 196 q0 0 0 0" />
+    <path d="M846 188 q10 -8 20 0 q10 -8 20 0" />
+    <path d="M736 220 q8 -7 16 0 q8 -7 16 0" />
+  </g>
+
+  <!-- 茶枝：从左边探进来 -->
+  <path d="M36 560 C 104 470 188 384 286 300 C 330 264 360 230 388 188" fill="none" stroke="#2F4F4F" stroke-width="3" stroke-linecap="round" />
+  <path d="M206 372 C 246 342 284 326 330 318" fill="none" stroke="#2F4F4F" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M118 466 C 156 440 198 430 244 430" fill="none" stroke="#2F4F4F" stroke-width="1.8" stroke-linecap="round" />
+  <g fill="#DEE4CB" stroke="#2F4F4F" stroke-width="2" stroke-linejoin="round">
+    <path d="M388 188 C 420 156 460 148 486 154 C 470 188 430 200 388 188 Z" />
+    <path d="M330 318 C 356 288 396 278 422 284 C 408 316 366 328 330 318 Z" />
+    <path d="M244 430 C 272 402 312 394 338 400 C 322 430 282 442 244 430 Z" />
+    <path d="M286 300 C 272 264 282 230 304 210 C 322 238 312 278 286 300 Z" />
+    <path d="M154 440 C 140 410 148 380 168 362 C 184 388 174 424 154 440 Z" />
+    <path d="M112 500 C 96 474 100 444 118 424 C 136 448 130 482 112 500 Z" />
+  </g>
+  <g fill="#DEE4CB" stroke="#2F4F4F" stroke-width="1.6" stroke-linejoin="round" opacity="0.85">
+    <path d="M470 250 C 500 224 536 218 558 224 C 542 252 506 262 470 250 Z" />
+    <path d="M540 320 C 568 296 602 290 622 296 C 608 322 574 332 540 320 Z" />
+  </g>
+
+  <!-- 飘着的两片叶 -->
+  <g fill="#DEE4CB" stroke="#2F4F4F" stroke-width="1.6" stroke-linejoin="round" opacity="0.7">
+    <path d="M650 226 C 668 210 690 208 704 214 C 694 232 672 238 650 226 Z" transform="rotate(-18 676 224)" />
+    <path d="M590 176 C 606 162 626 160 638 166 C 628 182 608 188 590 176 Z" transform="rotate(24 614 174)" />
+  </g>
+
+  <!-- 右下角：一饼茶 -->
+  <g transform="translate(966 428)">
+    <circle r="112" fill="#F0E4C9" stroke="#2F4F4F" stroke-width="3" />
+    <circle r="94" fill="none" stroke="#2F4F4F" stroke-width="1.4" opacity="0.28" />
+    <g stroke="#2F4F4F" stroke-width="1.2" opacity="0.28">
+      <path d="M0 -112 V -96" />
+      <path d="M79 -79 L 68 -68" />
+      <path d="M112 0 H 96" />
+      <path d="M79 79 L 68 68" />
+      <path d="M0 112 V 96" />
+      <path d="M-79 79 L -68 68" />
+      <path d="M-112 0 H -96" />
+      <path d="M-79 -79 L -68 -68" />
+    </g>
+    <g stroke="#2F4F4F" stroke-width="1" fill="none" opacity="0.14" stroke-linecap="round">
+      <path d="M-56 46 q30 14 62 8" />
+      <path d="M14 66 q24 -8 38 -22" />
+      <path d="M-64 -26 q18 -12 36 -14" />
+    </g>
+    <g transform="rotate(-6)">
+      <rect x="-30" y="-30" width="60" height="60" rx="4" fill="none" stroke="#6B4226" stroke-width="2.4" />
+      <text
+        x="0"
+        y="14"
+        text-anchor="middle"
+        font-family="'Noto Serif SC', 'Songti SC', 'SimSun', serif"
+        font-size="32"
+        fill="#6B4226"
+      >承</text>
+    </g>
+  </g>
+
+  <!-- 茶席线 -->
+  <path d="M0 540 Q300 566 600 540 Q900 514 1200 540" fill="none" stroke="#2F4F4F" stroke-width="1.6" opacity="0.18" />
+</svg>

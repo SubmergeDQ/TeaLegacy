@@ -25,4 +25,8 @@ export const icons: Record<string, string> = {
   close: '<path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/>',
   // 右箭头
   arrow: '<path d="M5 12h14"/><path d="m13.5 6.5 5.5 5.5-5.5 5.5"/>',
+  // 播放 / 暂停 / 重播（工序动画）
+  play: '<path d="M8.5 5.8v12.4L19 12z" fill="currentColor" stroke="none"/>',
+  pause: '<path d="M9 5.5v13M15 5.5v13" stroke-width="2.4"/>',
+  replay: '<path d="M4.5 12a7.5 7.5 0 1 0 2.8-5.8"/><path d="M4.5 4.5V9h4.5"/>',
 }

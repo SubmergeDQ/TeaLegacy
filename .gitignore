@@ -7,6 +7,7 @@ dist/
 dist-ssr/
 *.local
 release/
+.gradle-home/
 
 # 编辑器与系统
 .vscode/*
@@ -28,3 +29,7 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 /.workbuddy
+
+# 评审截图与本地记录
+.audit/
+.trae/

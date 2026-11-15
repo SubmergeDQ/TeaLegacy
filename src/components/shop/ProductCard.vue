@@ -36,7 +36,7 @@ function onAdd(event: MouseEvent) {
 
     <div class="p-card__body">
       <p v-if="featured" class="p-card__feature">本期主推</p>
-      <p v-if="product.tag" class="p-card__meta">
+      <p v-if="product.tag && !featured" class="p-card__meta">
         <span class="p-card__tag">{{ product.tag }}</span>
         <span class="p-card__sub">{{ product.sub }}</span>
       </p>
@@ -129,8 +129,8 @@ function onAdd(event: MouseEvent) {
 // 标签回到文字区：细字小号，不用彩色胶囊
 .p-card__tag {
   flex-shrink: 0;
-  font-size: 0.625rem;
-  letter-spacing: 0.1em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   color: var(--o-primary);
   padding-right: 0.375rem;
   border-right: 1px solid var(--o-line);

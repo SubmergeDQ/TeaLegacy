@@ -60,12 +60,12 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
       </button>
     </header>
 
-    <section class="shop__banner" aria-label="馆藏器物">
-      <img :src="banner" alt="清·宜兴紫砂壶，克利夫兰艺术博物馆藏" />
+    <section class="shop__banner" aria-label="茶山与茶饼">
+      <img :src="banner" alt="茶山、日头与一饼普洱的线稿" />
       <div class="shop__banner-text">
-        <h2>器以载茶</h2>
-        <p>一壶一盏，映照普洱茶的非遗技艺</p>
-        <cite>清 · 宜兴紫砂壶　克利夫兰艺术博物馆藏</cite>
+        <h2>一叶一山</h2>
+        <p>七道工序，做成七款普洱</p>
+        <cite>茶承 · 手绘工序图</cite>
       </div>
     </section>
 
@@ -217,7 +217,7 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
   cite {
     display: block;
     margin-top: 0.1875rem;
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-style: normal;
     letter-spacing: 0.04em;
     opacity: 0.78;

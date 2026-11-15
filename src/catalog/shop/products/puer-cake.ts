@@ -1,6 +1,6 @@
 // 商品模块 01：老班章古树生茶饼
 
-import p01 from '@/assets/products/p01-puer-cake-900.jpg'
+import puerCakeArt from '@/assets/craft/cake.svg'
 
 import type { Product } from '../types'
 
@@ -11,14 +11,13 @@ export const puerCake: Product = {
   price: 1880,
   originalPrice: 2280,
   unit: '357g / 饼',
-  tag: '非遗工艺',
+  tag: '石模压制',
   category: 'tea',
-  image: p01,
-  tone: 'warm',
-  source: '包装照 · WikiTea｜CC BY-SA 4.0 · Ash Crow',
+  image: puerCakeArt,
+  source: '示意茶样图 · 项目自绘线稿（非实物拍摄）',
   specs: [
     { label: '年份', value: '2021 年春' },
-    { label: '工艺', value: '石磨压制 · 手工棉纸' },
+    { label: '工艺', value: '石模压制 · 手工棉纸' },
     { label: '树龄', value: '百年以上古树' },
     { label: '仓储', value: '昆明干仓' },
   ],

@@ -4,8 +4,8 @@
 
 当前版本是高保真前端演示版，主线是「先做一遍，再买一饼」：
 
-1. **制茶**：选一款茶（生茶饼 / 小青柑 / 熟普沱茶）→ 五步互动工序（轻点、按住、拖动、选择）→ 成茶票签 → 当场带走同款；
-2. **商城**：商品列表 / 详情 / 购物车 / 模拟结算完整可用，详情页会显示「你已亲手制成这款茶」。
+1. **制茶**：选一款茶（生散、熟散、小青柑、龙珠、砖茶、茶饼、沱茶）→ 五至八步互动工序（连续轻点、按住）→ 成茶票签 → 当场带走同款；
+2. **商城**：只陈列这七款普洱，商品列表 / 详情 / 购物车 / 模拟结算完整可用，详情页会显示「你已亲手制成这款茶」。
 
 ## 技术栈
 
@@ -39,20 +39,18 @@ npm run preview    # 预览生产构建
 
 ## 制茶体验
 
-入口是一级 Tab「制茶」，也是默认首页。三款茶样各五步，每步一种互动；互动只上报 0–1 的进度，工序图版据此刻画变化。
+入口是一级 Tab「制茶」，也是默认首页。七款茶样各五至八步，每步一种互动；互动只上报 0–1 的进度，工序图版据此刻画变化。
 
 | 互动 | 控件 | 用在哪几步 |
 | --- | --- | --- |
-| `tap` | 底部控制条，轻点计数 | 采青、选果、翻堆 |
-| `hold` | 按住不放，控制条底部细线走完即完成 | 杀青、挖果、生晒、渥堆、蒸压 |
-| `swipe` | 在控制条上左右拖动（也可连点、键盘） | 萎凋、揉捻、解块 |
-| `choose` | 两张选项卡，决定成茶风味 | 填茶、定形 |
+| `tap` | 底部控制条，连续轻点计数；每次点击补 300ms 缓出动画 | 采摘、选果、拣剔、归仓、摊平、抖炒、推揉、摊开、拼配、搓珠、收布、提模、捏形 |
+| `hold` | 按住不放，控制条底部细线走完即完成 | 日光晒青、晒柑壳、烘干、渥堆、回潮、填茶、称茶、压制定型、阴干、静置 |
 
-- **模块化数据**：`src/catalog/craft/teas/` 下**一款互动产品一个模块**，每个模块只描述自己的茶样、步骤文案、互动参数与选项风味；新增一款茶只需新建模块，再在 `src/catalog/craft/index.ts` 登记一行，页面无需改动。
-- **工序场景**：`src/components/craft/scenes/` 下**每种工序图版一个组件**（茶枝与竹篓、竹筛、铁锅、竹席茶团、石磨、柑果、日晒、茶堆），共用笔法在 `src/styles/scene.scss`；`CraftScene.vue` 只按 `scene` key 调度，`progress` 驱动叶片离枝、摊开、转暗、压饼等变化；不画火苗，只在锅底铺一层随按住渐浓的暖光。
-- **成茶**：五步走完出「茶样票签」——茶样图、风味（茶样自带 + 每步选择所得）、评语、工序回顾、价格；可当场加购、查看茶品，或「再做一款」回选茶页。
+- **模块化数据**：`src/catalog/craft/teas/` 下**一款互动产品一个模块**，每个模块只描述自己的茶样、工序与成茶文案；新增一款茶只需新建模块，再在 `src/catalog/craft/index.ts` 登记一行，页面无需改动。每步的手感由 `src/catalog/craft/actions.ts` 按场景统一分配，数据模块不重复写控件。
+- **工序场景**：`src/components/craft/scenes/` 下**每种工序图版一个组件**（茶枝与竹篓、竹筛、铁锅、竹席茶团、日光、茶堆、柑果、压架、仓架等），共用笔法在 `src/styles/scene.scss`；`CraftScene.vue` 只按 `scene` key 调度，`progress` 驱动叶片离枝、摊开、转暗、压饼等变化；不画火苗，只在锅底铺一层随按住渐浓的暖光。
+- **成茶**：走完最后一步出「茶样票签」——茶样图、茶样自带风味、评语、工序回顾、价格；可当场加购、查看茶品，或「再做一遍」「换一款」。
 - **记录**：成茶写入 localStorage（键 `tea-legacy.craft.v1`）。选茶页据此显示「已制成」，商品详情页显示「你已亲手制成这款茶」。
-- **无障碍**：轻点与选择是原生按钮；按住支持空格 / 回车；拖动同时接受轻点与键盘操作。
+- **无障碍**：轻点与按住是原生按钮；按住支持空格 / 回车；轻点支持鼠标、触屏与键盘。
 
 ## Oil UI 的安装与引入方式
 
@@ -158,16 +156,21 @@ TeaLegacy/
    ├─ catalog/                  # ★ 内容模块：商品与互动产品
    │  ├─ craft/
    │  │  ├─ index.ts            #    互动产品汇总（craftTeas / getCraftTea / getCraftByProduct）
-   │  │  ├─ types.ts            #    茶样、步骤、互动与选项的类型
+   │  │  ├─ types.ts            #    茶样、工序、互动与紧压形态的类型
+   │  │  ├─ actions.ts          #    每一步的手感：连续轻点 / 按住
    │  │  └─ teas/               #    一款互动产品一个模块
-   │  │     ├─ sheng-bing.ts    #      老班章生茶饼
-   │  │     ├─ xiao-qing-gan.ts #      新会小青柑
-   │  │     └─ shou-tuo.ts      #      熟普沱茶
+   │  │     ├─ sheng-san.ts     #      普洱生散茶
+   │  │     ├─ shu-san.ts       #      普洱熟散茶
+   │  │     ├─ xiao-qing-gan.ts #      小青柑
+   │  │     ├─ long-zhu.ts      #      普洱龙珠
+   │  │     ├─ zhuan-cha.ts     #      普洱砖茶
+   │  │     ├─ sheng-bing.ts    #      普洱茶饼
+   │  │     └─ shou-tuo.ts      #      普洱沱茶
    │  └─ shop/
    │     ├─ index.ts            #    商品汇总（products / getProduct / banner）
    │     ├─ types.ts            #    商品类型
    │     ├─ banner.ts           #    首屏主视觉
-   │     └─ products/           #    一件商品一个模块（10 件）
+   │     └─ products/           #    一件商品一个模块（7 件，对应七款茶）
    ├─ components/
    │  ├─ oil-ui/               # ★ Oil UI 组件库
    │  │  ├─ index.ts           #    插件入口
@@ -180,16 +183,20 @@ TeaLegacy/
    │  │  └─ CartSettleBar.vue  # 底部结算栏
    │  └─ craft/
    │     ├─ CraftScene.vue     # 工序图版调度：按 scene key 取对应组件
-   │     ├─ CraftControl.vue   # 四种互动控件（轻点 / 按住 / 拖动 / 选择）
+   │     ├─ CraftControl.vue   # 两种手感（连续轻点 / 按住）
    │     └─ scenes/            # 每种工序图版一个组件 + 注册表
-   │        ├─ index.ts        #    场景注册表（garden / wither / wok ...）
+   │        ├─ index.ts        #    场景注册表（pluck / wok / press ...）
    │        ├─ GardenScene.vue  WitherScene.vue  WokScene.vue
-   │        ├─ RollScene.vue    PressScene.vue   CitrusScene.vue
-   │        ├─ SunScene.vue     PileScene.vue
-   │        └─ leaf.ts         #    全场共用的叶片路径
+   │        ├─ RollScene.vue    SunScene.vue     PileScene.vue
+   │        ├─ SortScene.vue    StoreScene.vue   CitrusScene.vue
+   │        ├─ PrepScene.vue    WeighScene.vue   BeadScene.vue
+   │        ├─ MoldScene.vue    PressScene.vue   DemoldScene.vue
+   │        ├─ DryScene.vue     WrapScene.vue    TuoShapeScene.vue
+   │        ├─ scene-utils.ts   #    进度窗口、弧线插值等共用函数
+   │        └─ leaf.ts          #    全场共用的叶片路径
    ├─ views/
    │  ├─ CraftSelectView.vue   # /craft       选茶页（一级 Tab，默认首页）
-   │  ├─ CraftMakeView.vue     # /craft/:id   五步制作 + 成茶票签
+   │  ├─ CraftMakeView.vue     # /craft/:id   五至八步制作 + 成茶票签
    │  ├─ ShopView.vue          # /shop        商城首页（主视觉 + 主推 + 双列网格）
    │  ├─ ProductView.vue       # /shop/:id    商品详情（含"已亲手制成"记录）
    │  └─ CartView.vue          # /cart        购物车 + 支付成功弹窗
@@ -222,14 +229,14 @@ TeaLegacy/
 | --- | --- | --- |
 | `/` | → `/craft` | 默认进入制茶 |
 | `/craft` | 选茶页 | 一级 Tab，显示 TabBar |
-| `/craft/:id` | 五步制作 + 成茶 | 全屏次级页，隐藏 TabBar |
+| `/craft/:id` | 五至八步制作 + 成茶 | 全屏次级页，隐藏 TabBar |
 | `/shop` | 商城首页 | 一级 Tab，显示 TabBar |
 | `/shop/:id` | 商品详情 | 全屏次级页，隐藏 TabBar |
 | `/cart` | 购物车 | 全屏次级页，隐藏 TabBar |
 
 ## 交互与状态
 
-- **制茶**：选茶 → 五步互动（轻点 / 按住 / 拖动 / 选择）→ 成茶票签 → 加购或查看茶品；「再做一款」回选茶页。每步完成留 0.5 秒落定再翻页，进度不因松手清零。
+- **制茶**：七款茶选一款 → 五至八步互动（连续轻点 / 按住）→ 成茶票签 → 加购或查看茶品；「再做一遍」重置本款，「换一款」回选茶页。每步完成留 0.5 秒落定再翻页，进度不因松手清零。
 - **加购**：点商品卡上的「+」→ 商品小图沿弧线飞入右上购物车图标 → 徽标跳动 +1 → 提示「已加购「…」」并提供「去看看」入口。
 - **购物车**：数量加减（1–99，步进器）、删除（直接执行 + 6 秒内可撤销）、合计实时更新。
 - **结算**：点「去结算」→ 按钮进入「处理中」并禁用（防重复提交）→ 约 0.9 秒后弹「支付成功」，**同时清空购物车**；结果弹窗不可点遮罩关闭，点「好的」返回空购物车状态。
@@ -238,9 +245,9 @@ TeaLegacy/
 
 ## Mock 数据
 
-- **商城**：`src/catalog/shop/products/`，一件商品一个模块（10 件：老班章生茶饼、新会小青柑、勐海熟普沱茶 + 7 件茶器），`src/catalog/shop/index.ts` 汇总陈列顺序；含名称、副题、价格、规格、茶品志、器物出处。器物图来自博物馆开放馆藏，逐条来源与许可见 [`src/assets/products/SOURCES.md`](src/assets/products/SOURCES.md)；茶饼图为商品包装照（CC BY-SA 4.0，摄影 Ash Crow），已在界面与 SOURCES.md 署名。
-- **制茶**：`src/catalog/craft/teas/`，一款互动产品一个模块（3 款 × 5 步），步骤文案为工艺示意，非严格教科书表述。
-- **占位素材**：小青柑、熟普沱茶没有实拍图，茶样用 `src/assets/craft/*.svg` 自绘线稿占位（项目无生图授权），界面与详情页均标注「示意茶样图 · 项目自绘占位」。正式上线建议替换为自有拍摄，与其余商品图统一。
+- **商城**：`src/catalog/shop/products/`，一件商品一个模块（7 件，对应生散、熟散、小青柑、龙珠、砖茶、茶饼、沱茶），`src/catalog/shop/index.ts` 汇总陈列顺序；含名称、副题、价格、规格、茶品志。所有茶样图均为 `src/assets/craft/*.svg` 自绘线稿，界面与详情页标注「示意茶样图 · 项目自绘线稿（非实物拍摄）」。
+- **制茶**：`src/catalog/craft/teas/`，一款互动产品一个模块（7 款 × 5–8 步），步骤文案为工艺示意，非严格教科书表述；每步手感由 `src/catalog/craft/actions.ts` 按场景分配。
+- **素材**：工序场景全部为 320×240 内联 SVG 线稿，茶样图为 300×300 SVG 线稿，不依赖任何实拍图或外部图片服务。
 
 ## 打包为 APK
 

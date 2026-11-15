@@ -1,41 +1,76 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-// 渥堆：茶堆随发酵升高，翻堆时散开
-const props = defineProps<{ progress: number; step: string }>()
+import type { CraftForm, CraftSceneKey } from '@/catalog/craft/types'
 
-const p = computed(() => Math.min(1, Math.max(0, props.progress)))
-const pileHeight = computed(() => 26 + p.value * 54)
-const turning = computed(() => props.step === 'turn')
+import { clamp01 } from './scene-utils'
+
+// 渥堆与摊晾：同一堆茶，先堆起来发酵，再开沟摊薄散堆味。
+const props = defineProps<{ scene: CraftSceneKey; form?: CraftForm; progress: number }>()
+
+const p = computed(() => clamp01(props.progress))
+const spreading = computed(() => props.scene === 'spread')
+
+const pileHeight = computed(() => 28 + p.value * 54)
+const halfWidth = computed(() => (spreading.value ? 64 + p.value * 52 : 96))
+const spreadHeight = computed(() => 86 - p.value * 62)
+
+const pilePath = computed(() => {
+  if (!spreading.value) {
+    return `M64 202 Q160 ${202 - pileHeight.value * 2} 256 202 Z`
+  }
+  return `M${160 - halfWidth.value} 202 Q160 ${202 - spreadHeight.value * 2} ${160 + halfWidth.value} 202 Z`
+})
+
+const steam = computed(() => (spreading.value ? 0.7 * (1 - p.value) : 0.35 + p.value * 0.45))
 </script>
 
 <template>
   <svg class="scene" viewBox="0 0 320 240" role="img" aria-hidden="true">
-    <path
-      class="s-line s-tea-wash"
-      :d="`M64 200 Q160 ${200 - pileHeight * 2} 256 200 Z`"
-    />
-    <path
+    <defs>
+      <linearGradient id="pileWarm" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c07a34" stop-opacity="0.42" />
+        <stop offset="100%" stop-color="#6b4226" stop-opacity="0.24" />
+      </linearGradient>
+      <clipPath id="pileClip">
+        <path :d="pilePath" />
+      </clipPath>
+    </defs>
+
+    <!-- 茶堆 -->
+    <path :d="pilePath" fill="url(#pileWarm)" stroke="var(--o-ink)" stroke-width="1.4" />
+
+    <!-- 堆面纹理：统一裁在堆形以内，堆矮时不会浮在半空 -->
+    <g clip-path="url(#pileClip)" class="s-line s-thin" :style="{ opacity: spreading ? 0.3 : 0.5 }">
+      <path d="M96 190 q26 -14 54 -8" />
+      <path d="M148 184 q30 10 62 0" />
+      <path d="M116 174 q22 -10 44 -4" />
+      <path d="M172 172 q24 8 44 -2" />
+      <path d="M124 156 q22 -8 44 -2" />
+      <path d="M166 150 q20 6 36 0" />
+      <path d="M140 136 q18 -6 36 -1" />
+    </g>
+
+    <!-- 翻堆的动作交给热气与堆形的变化，不再让木耙斜着悬在半空 -->
+
+    <!-- 发酵的热气 -->
+    <g
       class="s-line s-thin"
-      :d="`M64 200 Q160 ${200 - pileHeight * 2} 256 200`"
-      stroke="#6b4226"
-      stroke-opacity="0.5"
-    />
-
-    <!-- 棉布搭在堆上 -->
-    <path class="s-dash" :d="`M86 196 Q160 ${186 - pileHeight * 1.5} 234 196`" />
-
-    <g class="s-line s-thin" :style="{ opacity: 0.25 + p * 0.5 }">
-      <path d="M112 96 C 104 86 118 80 112 68" />
-      <path d="M160 86 C 152 76 166 70 160 58" />
-      <path d="M208 96 C 200 86 214 80 208 68" />
+      :style="{ opacity: steam, transform: `translateY(${(1 - p) * 8}px)` }"
+    >
+      <path d="M118 150 C 110 138 124 130 118 116" />
+      <path d="M160 134 C 152 122 166 114 160 100" />
+      <path d="M202 150 C 194 138 208 130 202 116" />
     </g>
 
-    <g v-if="turning" class="s-line s-thin" :style="{ opacity: p }">
-      <path d="M78 146 a 82 58 0 0 1 164 0" />
-      <path d="M242 136 l 10 10 l -16 4" />
+    <!-- 堆心的微生物活动：摊开后就不画了，避免浮在扁堆外 -->
+    <g v-if="!spreading" fill="#c07a34" :style="{ opacity: 0.2 + p * 0.5 }">
+      <circle cx="132" cy="182" r="2" />
+      <circle cx="158" cy="172" r="2.4" />
+      <circle cx="188" cy="180" r="2" />
+      <circle cx="172" cy="192" r="1.8" />
     </g>
 
-    <path class="s-line s-thin s-faint" d="M44 202 H276" />
+    <path class="s-line s-thin s-faint" d="M28 204 H292" />
   </svg>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import CraftControl from '@/components/craft/CraftControl.vue'
@@ -8,12 +8,15 @@ import OButton from '@/components/oil-ui/OButton.vue'
 import ONavBar from '@/components/oil-ui/ONavBar.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import { getCraftTea } from '@/catalog/craft'
+import { actionForStep } from '@/catalog/craft/actions'
 import { getProduct } from '@/catalog/shop'
 import { useCartStore } from '@/stores/cart'
 import { useCraftStore } from '@/stores/craft'
 import { formatPrice } from '@/utils/format'
 
-// 制作页：一步一互动，走完五步就是成茶票签。
+// 制作页：一步一互动，走完一款茶的工序就是成茶票签。
+// 每一幕的图版只读 progress（0–1），由手上的动作推进：
+// 采、摊、揉、炒、搓、提模连续轻点；晒、压、渥堆按住。
 // 成茶后可以买同款，也可以退回去换一款——不逼着人做完才能逛。
 
 const route = useRoute()
@@ -29,55 +32,99 @@ watchEffect(() => {
   if (!tea.value) router.replace('/craft')
 })
 
-const root = ref<HTMLElement>()
 const index = ref(0)
 const progress = ref(0)
 const phase = ref<'making' | 'done'>('making')
-const pickedFlavors = ref<string[]>([])
 const advancing = ref(false)
 
 const step = computed(() => tea.value?.steps[index.value])
 const total = computed(() => tea.value?.steps.length ?? 0)
-const stepNo = computed(() => String(index.value + 1).padStart(2, '0'))
+const stepNo = computed(() => String(Math.min(index.value + 1, total.value)).padStart(2, '0'))
 const totalNo = computed(() => String(total.value).padStart(2, '0'))
+const action = computed(() => (step.value ? actionForStep(step.value) : undefined))
 
-/** 成茶风味：茶样自带 + 每一步选择的结果 */
-const flavors = computed(() => [
-  ...new Set([...(tea.value?.baseFlavors ?? []), ...pickedFlavors.value]),
-])
+// 连续轻点的进度是跳着走的（1/6、2/6……）。
+// 这里把每次点击补成一段 300ms 的缓出，图版才会真的"动"起来。
+const TWEEN_MS = 300
+let tweenRaf = 0
+let tweenFrom = 0
+let tweenStart = 0
+
+function cancelTween() {
+  cancelAnimationFrame(tweenRaf)
+  tweenRaf = 0
+}
+
+function tweenTo(target: number) {
+  cancelTween()
+  const from = progress.value
+  const delta = target - from
+  if (Math.abs(delta) < 0.001) {
+    progress.value = target
+    return
+  }
+  tweenFrom = from
+  tweenStart = performance.now()
+  const tick = (now: number) => {
+    const t = Math.min(1, (now - tweenStart) / TWEEN_MS)
+    const eased = 1 - Math.pow(1 - t, 3)
+    progress.value = tweenFrom + delta * eased
+    if (t < 1) tweenRaf = requestAnimationFrame(tick)
+    else tweenRaf = 0
+  }
+  tweenRaf = requestAnimationFrame(tick)
+}
+
+function onProgress(value: number) {
+  // 按住本身就是逐帧连续的，直接用；轻点补动画
+  if (action.value?.type === 'hold') {
+    cancelTween()
+    progress.value = value
+  } else {
+    tweenTo(value)
+  }
+}
+
+/** 成茶风味：茶样自带 */
+const flavors = computed(() => tea.value?.baseFlavors ?? [])
 
 function segScale(i: number): number {
   if (i < index.value) return 1
-  if (i === index.value) return Math.max(progress.value, 0.05)
+  if (i === index.value) return progress.value
   return 0
 }
 
 async function scrollTop() {
   await nextTick()
-  const body = root.value?.closest('.app-body')
+  const body = document.body.querySelector('.app-body')
   if (body instanceof HTMLElement) body.scrollTop = 0
 }
 
 /** 一步做完：留半拍看完成的落定，再进下一步 */
-function onDone(line: string[]) {
+let advanceTimer = 0
+
+function onDone() {
   if (advancing.value || !tea.value) return
   advancing.value = true
-  if (line.length) {
-    pickedFlavors.value = [...new Set([...pickedFlavors.value, ...line])]
-  }
-  window.setTimeout(() => {
+  advanceTimer = window.setTimeout(() => {
     advancing.value = false
     if (!tea.value) return
     if (index.value >= tea.value.steps.length - 1) {
-      craft.finish(tea.value.id, flavors.value)
+      craft.finish(tea.value.id, tea.value.baseFlavors)
       phase.value = 'done'
     } else {
       index.value += 1
+      cancelTween()
       progress.value = 0
     }
     void scrollTop()
   }, 520)
 }
+
+onBeforeUnmount(() => {
+  window.clearTimeout(advanceTimer)
+  cancelTween()
+})
 
 function goBack() {
   if (window.history.length > 1) router.back()
@@ -101,11 +148,38 @@ function openProduct() {
 function again() {
   router.replace('/craft')
 }
+
+function replay() {
+  phase.value = 'making'
+  index.value = 0
+  cancelTween()
+  progress.value = 0
+  void scrollTop()
+}
+
+/** 开发核对用：?frame=3:0.5 定格在第四幕的一半，不影响正式用户 */
+function readFrame() {
+  if (!import.meta.env.DEV) return
+  const raw =
+    (typeof route.query.frame === 'string' ? route.query.frame : undefined) ??
+    new URLSearchParams(window.location.search).get('frame') ??
+    undefined
+  if (!raw) return
+  const [s, t] = raw.split(':')
+  const si = Number(s)
+  const pp = Number(t)
+  if (tea.value && Number.isFinite(si)) {
+    index.value = Math.min(tea.value.steps.length - 1, Math.max(0, Math.floor(si)))
+  }
+  if (Number.isFinite(pp)) progress.value = Math.min(1, Math.max(0, pp))
+}
+
+onMounted(readFrame)
 </script>
 
 <template>
-  <div v-if="tea" ref="root" class="make">
-    <ONavBar :title="phase === 'done' ? '成茶' : '制茶'" back @back="goBack" />
+  <div v-if="tea" class="make">
+    <ONavBar :title="phase === 'done' ? '成茶' : tea.name" back @back="goBack" />
 
     <!-- ================= 工序 ================= -->
     <template v-if="phase === 'making' && step">
@@ -132,22 +206,26 @@ function again() {
           <CraftScene
             :key="step.key"
             :scene="step.scene"
-            :step="step.key"
+            :form="step.form"
             :progress="progress"
           />
         </Transition>
+        <span class="make__stage-no" aria-hidden="true">{{ stepNo }}</span>
       </div>
 
-      <div class="make__copy">
-        <p class="make__caption">{{ step.caption }}</p>
-        <p class="make__detail">{{ step.detail }}</p>
-      </div>
+      <Transition name="copy" mode="out-in">
+        <div :key="step.key" class="make__copy">
+          <p class="make__caption">{{ step.caption }}</p>
+          <p class="make__detail">{{ step.detail }}</p>
+        </div>
+      </Transition>
 
       <div class="make__control">
         <CraftControl
+          v-if="action"
           :key="step.key"
-          :action="step.action"
-          @update:progress="progress = $event"
+          :action="action"
+          @update:progress="onProgress"
           @done="onDone"
         />
       </div>
@@ -155,7 +233,7 @@ function again() {
 
     <!-- ================= 成茶 ================= -->
     <div v-else class="result">
-      <p class="result__eyebrow">成茶 · {{ total }} 步已毕</p>
+      <p class="result__eyebrow">茶样票签 · {{ total }} 步已毕</p>
 
       <div class="result__art">
         <img :src="tea.art" :alt="tea.name" />
@@ -173,11 +251,10 @@ function again() {
         <p class="result__sign">茶承 · 手制</p>
       </div>
 
-      <!-- 工序回顾：这五步是自己一步一步走完的 -->
+      <!-- 工序回顾：这几步是自己一步一步走完的 -->
       <ol class="result__steps">
         <li v-for="(s, i) in tea.steps" :key="s.key">
-          <span class="result__step-no">{{ String(i + 1).padStart(2, '0') }}</span>
-          <span class="result__step-name">{{ s.title }}</span>
+          <i>{{ String(i + 1).padStart(2, '0') }}</i>{{ s.title }}
         </li>
       </ol>
 
@@ -190,7 +267,9 @@ function again() {
         <div class="result__links">
           <button @click="openProduct">查看茶品</button>
           <span aria-hidden="true">·</span>
-          <button @click="again">再做一款</button>
+          <button @click="replay">再做一遍</button>
+          <span aria-hidden="true">·</span>
+          <button @click="again">换一款</button>
         </div>
       </div>
     </div>
@@ -204,7 +283,7 @@ function again() {
   flex-direction: column;
 }
 
-// —— 工序头：步名 + 五段进度 ——
+// —— 工序头：步名 + 分段进度 ——
 .make__rail {
   padding: 0.75rem 1rem 0;
 }
@@ -260,12 +339,12 @@ function again() {
   }
 }
 
-// —— 工序图版：方形版心，虚线是图版的边框而不是插画的一部分 ——
+// —— 图版：方形版心，虚线是图版的边框而不是插画的一部分 ——
 .make__stage {
   position: relative;
   aspect-ratio: 1 / 1;
   max-height: 26rem;
-  margin: auto 1rem 0;
+  margin: 0.75rem 1rem 0;
   border-radius: var(--o-radius-card);
   background: linear-gradient(180deg, #fbf7ee 0%, #f3ecdc 100%);
   overflow: hidden;
@@ -279,6 +358,21 @@ function again() {
     opacity: 0.16;
     pointer-events: none;
   }
+}
+
+.make__stage-no {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.875rem;
+  font-family: var(--o-font-serif);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--o-primary);
+  opacity: 0.14;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
 .scene-enter-active {
@@ -309,6 +403,27 @@ function again() {
   text-align: center;
 }
 
+.copy-enter-active {
+  transition:
+    opacity 260ms var(--o-ease-flow),
+    transform 260ms var(--o-ease-flow);
+}
+
+.copy-leave-active {
+  transition:
+    opacity 140ms linear,
+    transform 140ms linear;
+}
+
+.copy-enter-from {
+  opacity: 0;
+  transform: translateY(0.25rem);
+}
+
+.copy-leave-to {
+  opacity: 0;
+}
+
 .make__caption {
   font-family: var(--o-font-serif);
   font-size: 1rem;
@@ -325,6 +440,7 @@ function again() {
   color: var(--o-muted);
 }
 
+// —— 控制面 ——
 .make__control {
   margin-top: auto;
   padding: 0.875rem 1rem calc(1rem + var(--o-safe-bottom));
@@ -427,58 +543,51 @@ function again() {
   color: var(--o-text);
 }
 
-// 落款：不另盖一枚印（饼上已有），只留一行交代来处
 .result__sign {
   margin-top: 0.375rem;
   font-family: var(--o-font-serif);
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   letter-spacing: 0.24em;
   color: var(--o-muted);
   text-align: right;
   opacity: 0.8;
 }
 
-// 工序回顾：五步一条窄带，数字是走过的顺序
+// 工序回顾：编号领起，八步也能自然折行
 .result__steps {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0.75rem;
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 0.875rem;
+  padding: 0.625rem 0;
   border-top: 1px solid var(--o-line);
   border-bottom: 1px solid var(--o-line);
 }
 
 .result__steps li {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.125rem;
-  padding: 0.5rem 0 0.4375rem;
-
-  &:not(:first-child) {
-    border-left: 1px solid var(--o-line);
-  }
-}
-
-.result__step-no {
-  font-family: var(--o-font-serif);
-  font-size: 0.5625rem;
-  letter-spacing: 0.08em;
-  color: var(--o-primary);
-  opacity: 0.75;
-}
-
-.result__step-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
   font-family: var(--o-font-serif);
   font-size: 0.6875rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--o-text);
+
+  i {
+    font-style: normal;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--o-primary);
+    opacity: 0.8;
+  }
 }
 
 .result__price {
   display: flex;
   align-items: baseline;
-  margin-top: 1.25rem;
+  margin-top: 1.125rem;
   font-family: var(--o-font-serif);
   color: var(--o-primary);
 
@@ -503,7 +612,6 @@ function again() {
   gap: 0.25rem;
 }
 
-// 次要动作降为文字链：一屏之内只有一个实底按钮
 .result__links {
   display: flex;
   align-items: center;

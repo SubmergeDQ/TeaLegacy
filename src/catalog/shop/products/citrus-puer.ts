@@ -13,7 +13,7 @@ export const citrusPuer: Product = {
   tag: '生晒',
   category: 'tea',
   image: citrusArt,
-  source: '示意茶样图 · 项目自绘占位（非实物拍摄）',
+  source: '示意茶样图 · 项目自绘线稿（非实物拍摄）',
   specs: [
     { label: '产区', value: '广东新会' },
     { label: '工艺', value: '挖果填茶 · 日晒三日' },

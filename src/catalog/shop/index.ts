@@ -1,36 +1,32 @@
 // ============================================================
 // 商城商品汇总
 //
+// 只陈列与制茶工序对应的七款普洱：
+// 生散、熟散、小青柑、龙珠、砖茶、茶饼、沱茶。
 // 新增一件商品：在 products/ 下建一个模块文件，
 // 再到 products 数组里按展示顺序登记一行即可。
 // ============================================================
 
 import { citrusPuer } from './products/citrus-puer'
-import { flatTeapot } from './products/flat-teapot'
-import { oribeBowl } from './products/oribe-bowl'
-import { plumTeapot } from './products/plum-teapot'
+import { longZhu } from './products/long-zhu'
 import { puerCake } from './products/puer-cake'
-import { teaCaddy } from './products/tea-caddy'
-import { teaPet } from './products/tea-pet'
-import { temmokuBowl } from './products/temmoku-bowl'
+import { rawLoose } from './products/raw-loose'
+import { ripeLoose } from './products/ripe-loose'
 import { tuoCha } from './products/tuo-cha'
-import { zhuniTeapot } from './products/zhuni-teapot'
+import { zhuanCha } from './products/zhuan-cha'
 import type { Product } from './types'
 
 export type { Product } from './types'
 export { banner } from './banner'
 
-/** 商城首页的陈列顺序 */
+/** 商城首页的陈列顺序：与制茶页的七款茶一一对应 */
 export const products: Product[] = [
-  puerCake,
-  temmokuBowl,
-  plumTeapot,
-  zhuniTeapot,
-  oribeBowl,
-  teaCaddy,
-  teaPet,
-  flatTeapot,
+  rawLoose,
+  ripeLoose,
   citrusPuer,
+  longZhu,
+  zhuanCha,
+  puerCake,
   tuoCha,
 ]
 

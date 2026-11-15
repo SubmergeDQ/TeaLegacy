@@ -22,8 +22,8 @@ const doneCount = computed(() => craftTeas.filter((t) => craft.done(t.id)).lengt
         <span>制茶</span>
         <span class="craft__count">已制成 {{ doneCount }} / {{ craftTeas.length }}</span>
       </div>
-      <h1 class="craft__title">选一款茶，亲手做一遍</h1>
-      <p class="craft__sub">采、炒、揉、压，五步成一饼。做完就能把它带走。</p>
+      <h1 class="craft__title">七款普洱，七段手作</h1>
+      <p class="craft__sub">从鲜叶到紧压，一道茶有一道茶的走法。亲手做一遍，再带走它。</p>
     </header>
 
     <ul class="craft__list">
@@ -39,7 +39,7 @@ const doneCount = computed(() => craftTeas.filter((t) => craft.done(t.id)).lengt
               <span v-if="craft.done(tea.id)" class="craft__done">已制成</span>
             </span>
             <span class="craft__meta">
-              {{ tea.sub }} · {{ tea.steps.length }} 步 · {{ tea.duration }}
+              {{ tea.sub }} · {{ tea.steps.length }} 道工序 · {{ tea.duration }}
             </span>
             <span class="craft__intro">{{ tea.intro }}</span>
           </span>
@@ -51,7 +51,7 @@ const doneCount = computed(() => craftTeas.filter((t) => craft.done(t.id)).lengt
 
     <blockquote class="craft__quote">看一遍不如做一遍——手上过一遍，才知一饼茶的分量。</blockquote>
 
-    <p class="craft__foot">每款茶五步，约半分钟。做完可当场购买同款。</p>
+    <p class="craft__foot">每款五至八步，约半分钟。做完可当场购买同款。</p>
   </div>
 </template>
 
@@ -156,16 +156,16 @@ const doneCount = computed(() => craftTeas.filter((t) => craft.done(t.id)).lengt
   color: var(--o-title);
 }
 
-// 已制成：一枚小小的落款，不做成彩色角标
+// 已看全：一枚小小的落款，不做成彩色角标
 .craft__done {
   flex-shrink: 0;
   padding: 0 0.25rem;
   border: 1px solid var(--o-primary);
   border-radius: 0.125rem;
   font-family: var(--o-font-serif);
-  font-size: 0.5625rem;
+  font-size: 0.6875rem;
   line-height: 1.35;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--o-primary);
 }
 
