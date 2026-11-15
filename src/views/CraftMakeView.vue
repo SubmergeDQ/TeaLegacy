@@ -36,6 +36,8 @@ const index = ref(0)
 const progress = ref(0)
 const phase = ref<'making' | 'done'>('making')
 const advancing = ref(false)
+const pressing = ref(false)
+const controlRef = ref<InstanceType<typeof CraftControl> | null>(null)
 
 const step = computed(() => tea.value?.steps[index.value])
 const total = computed(() => tea.value?.steps.length ?? 0)
@@ -85,6 +87,24 @@ function onProgress(value: number) {
   }
 }
 
+// —— 图版直接操作：轻点画面等同点一次，按住画面等同按住控制条 ——
+function onStageTap() {
+  controlRef.value?.tap()
+}
+
+function onStageDown(event: PointerEvent) {
+  if (action.value?.type !== 'hold') return
+  event.preventDefault()
+  pressing.value = true
+  controlRef.value?.holdStart()
+}
+
+function onStageUp() {
+  if (action.value?.type !== 'hold') return
+  pressing.value = false
+  controlRef.value?.holdStop()
+}
+
 /** 成茶风味：茶样自带 */
 const flavors = computed(() => tea.value?.baseFlavors ?? [])
 
@@ -108,6 +128,7 @@ function onDone() {
   advancing.value = true
   advanceTimer = window.setTimeout(() => {
     advancing.value = false
+    pressing.value = false
     if (!tea.value) return
     if (index.value >= tea.value.steps.length - 1) {
       craft.finish(tea.value.id, tea.value.baseFlavors)
@@ -152,6 +173,7 @@ function again() {
 function replay() {
   phase.value = 'making'
   index.value = 0
+  pressing.value = false
   cancelTween()
   progress.value = 0
   void scrollTop()
@@ -201,7 +223,16 @@ onMounted(readFrame)
         </div>
       </div>
 
-      <div class="make__stage">
+      <div
+        class="make__stage"
+        :class="{ 'is-hold': action?.type === 'hold', 'is-pressing': pressing }"
+        @click="onStageTap"
+        @pointerdown="onStageDown"
+        @pointerup="onStageUp"
+        @pointercancel="onStageUp"
+        @pointerleave="onStageUp"
+        @contextmenu.prevent
+      >
         <Transition name="scene" mode="out-in">
           <CraftScene
             :key="step.key"
@@ -223,6 +254,7 @@ onMounted(readFrame)
       <div class="make__control">
         <CraftControl
           v-if="action"
+          ref="controlRef"
           :key="step.key"
           :action="action"
           @update:progress="onProgress"
@@ -348,6 +380,20 @@ onMounted(readFrame)
   border-radius: var(--o-radius-card);
   background: linear-gradient(180deg, #fbf7ee 0%, #f3ecdc 100%);
   overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--o-ease-flow);
+
+  &.is-hold {
+    touch-action: none;
+  }
+
+  &.is-pressing {
+    transform: scale(0.994);
+  }
 
   &::after {
     content: '';

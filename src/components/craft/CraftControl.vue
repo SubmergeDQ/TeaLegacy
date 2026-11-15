@@ -32,7 +32,7 @@ const valueText = computed(() => {
 })
 
 const hint = computed(() =>
-  type.value === 'hold' ? '按住不放，直到走完' : '连续轻点',
+  type.value === 'hold' ? '按住画面或按钮，直到走完' : '轻点画面或按钮',
 )
 
 let raf = 0
@@ -115,6 +115,13 @@ onMounted(() => window.addEventListener('pointerup', stopHold))
 onBeforeUnmount(() => {
   window.removeEventListener('pointerup', stopHold)
   cancelAnimationFrame(raf)
+})
+
+// 让上方的图版也能直接操作：轻点等于一次点击，按住等于按住按钮
+defineExpose({
+  tap: onClick,
+  holdStart: startHold,
+  holdStop: stopHold,
 })
 </script>
 
