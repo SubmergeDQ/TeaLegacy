@@ -33,3 +33,4 @@ pnpm-debug.log*
 # 评审截图与本地记录
 .audit/
 .trae/
+.gh/
