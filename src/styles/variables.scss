@@ -20,6 +20,13 @@ $o-disabled: #c9c2b2; // 禁用
 $o-on-ink: #f3eee3; // 墨绿/深底上的文字
 $o-mask: rgba(28, 25, 18, 0.52); // 遮罩
 
+// —— 语义色：商家端状态（在售 / 预警 / 缺货 / 说明）——
+// 只表达状态，不做装饰；与茶色系同明度带，避免跳出纸面
+$o-success: #3f6b4a;
+$o-warn: #a87728;
+$o-danger: #a5463a;
+$o-info: #4a6b73;
+
 // —— 字体 ——
 $o-font-serif: 'Noto Serif SC Variable', 'Noto Serif SC', 'Songti SC',
   'STSong', 'SimSun', serif;

@@ -10,11 +10,13 @@ import {
   DEMO_PASSWORD,
   useAdminAuthStore,
 } from '@/merchant/stores/adminAuth'
+import { useAppRoleStore } from '@/stores/appRole'
 
 // 演示用模拟登录：不走后端，账号密码在 store 内本地校验。
 const route = useRoute()
 const router = useRouter()
 const auth = useAdminAuthStore()
+const appRole = useAppRoleStore()
 
 const account = ref('')
 const password = ref('')
@@ -42,6 +44,8 @@ async function submit() {
     return
   }
   showToast({ text: '已进入商家中心' })
+  // 直达登录页时身份可能还没写：登录成功即视为本次会话选定了商家端
+  appRole.choose('merchant')
   const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
   await router.replace(redirect || '/admin/dashboard')
 }

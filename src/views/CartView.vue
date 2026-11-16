@@ -9,6 +9,7 @@ import ONavBar from '@/components/oil-ui/ONavBar.vue'
 import OStepper from '@/components/oil-ui/OStepper.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import CartSettleBar from '@/components/shop/CartSettleBar.vue'
+import { useAdminOrdersStore } from '@/catalog/admin'
 import type { Product } from '@/catalog/shop'
 import { formatPrice } from '@/utils/format'
 import { delay } from '@/utils/motion'
@@ -16,6 +17,8 @@ import { useCartStore } from '@/stores/cart'
 
 const router = useRouter()
 const cart = useCartStore()
+// 结算写入商家端订单：后台「待发货」立刻 +1，演示闭环
+const adminOrders = useAdminOrdersStore()
 
 const paying = ref(false)
 const payShow = ref(false)
@@ -36,6 +39,14 @@ async function settle() {
   paying.value = true
   await delay(900)
   paidAmount.value = cart.total
+  adminOrders.createFromCart(
+    cart.detailed.map((line) => ({
+      productId: line.product.id,
+      name: line.product.name,
+      price: line.product.price,
+      qty: line.qty,
+    })),
+  )
   cart.clear()
   paying.value = false
   payShow.value = true

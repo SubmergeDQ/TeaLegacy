@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import OBadge from '@/components/oil-ui/OBadge.vue'
@@ -8,7 +8,8 @@ import OIcon from '@/components/oil-ui/OIcon.vue'
 import RoleSwitcher from '@/components/RoleSwitcher.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import ProductCard from '@/components/shop/ProductCard.vue'
-import { banner, getProduct, products } from '@/catalog/shop'
+import { getVisibleProducts } from '@/catalog/admin/read'
+import { banner, getProduct } from '@/catalog/shop'
 import { useAppRoleStore } from '@/stores/appRole'
 import { useCartStore } from '@/stores/cart'
 import { bump, flyToCart } from '@/utils/motion'
@@ -25,7 +26,10 @@ onMounted(() => {
   entered.value = true
 })
 
-const [featured, ...rest] = products
+// 读商家端合并层：改价、下架在 C 端即时生效
+const visible = computed(() => getVisibleProducts())
+const featured = computed(() => visible.value[0])
+const rest = computed(() => visible.value.slice(1))
 
 function openCart() {
   router.push('/cart')
@@ -115,10 +119,11 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
     <section class="shop__list">
       <h2 class="shop__section">
         店内茶品
-        <span>共 {{ products.length }} 款</span>
+        <span>共 {{ visible.length }} 款</span>
       </h2>
       <div class="shop__grid">
         <ProductCard
+          v-if="featured"
           :product="featured"
           featured
           :style="{ '--enter-delay': '0ms' }"

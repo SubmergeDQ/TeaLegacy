@@ -19,6 +19,11 @@
   --o-disabled: #c9c2b2;
   --o-on-ink: #f3eee3;
   --o-mask: rgba(28, 25, 18, 0.52);
+  // 语义色（商家端状态）
+  --o-success: #3f6b4a;
+  --o-warn: #a87728;
+  --o-danger: #a5463a;
+  --o-info: #4a6b73;
   --o-font-serif: 'Noto Serif SC Variable', 'Noto Serif SC', 'Songti SC',
     'STSong', 'SimSun', serif;
   --o-font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC',
@@ -69,7 +74,10 @@ dd {
   padding: 0;
 }
 
-ul {
+ul,
+ol {
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 

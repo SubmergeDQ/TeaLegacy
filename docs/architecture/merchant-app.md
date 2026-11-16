@@ -6,10 +6,10 @@
 
 ---
 
-> **仓库状态**：用户端已实现；商家端方案已定（A 单应用路由分区），M0 骨架已落地（`src/merchant/`：登录 / 路由 / 4 个 Tab 占位）。
+> **仓库状态**：用户端已实现；商家端方案已定（A 单应用路由分区），**P0 已落地**（登录 / 概览 / 商品列表与编辑 / 订单列表与详情 / 店铺设置，数据层 `src/catalog/admin/`，C 端下单闭环）。
 > 方案与决策见 [plans/00-方案对比.md](../plans/00-方案对比.md)、[DECISIONS.md](../DECISIONS.md)。
 > **目录以方案 A 为准**：商家端页面落在 `src/merchant/views/*`，路由 `src/merchant/router/index.ts`，
-> 数据层 `src/catalog/admin/*`（P0 阶段建）；本文 4.1–4.3 已按实际实现修订。
+> 数据层 `src/catalog/admin/*`；本文 4.1–4.3 已按实际实现修订。
 
 ## 0. 结论速览
 

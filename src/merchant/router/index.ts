@@ -35,7 +35,7 @@ export const merchantRoutes: RouteRecordRaw[] = [
     path: '/admin/products',
     name: 'admin-products',
     component: () => import('@/merchant/views/AdminProductsView.vue'),
-    meta: { ...base, tab: 'products', depth: 1, title: '商品' },
+    meta: { ...base, tab: 'products', depth: 1, title: '商品', toastTop: '8.5rem' },
   },
   {
     path: '/admin/products/:id',
@@ -47,7 +47,7 @@ export const merchantRoutes: RouteRecordRaw[] = [
     path: '/admin/orders',
     name: 'admin-orders',
     component: () => import('@/merchant/views/AdminOrdersView.vue'),
-    meta: { ...base, tab: 'orders', depth: 1, title: '订单' },
+    meta: { ...base, tab: 'orders', depth: 1, title: '订单', toastTop: '9.25rem' },
   },
   {
     path: '/admin/orders/:no',
@@ -60,5 +60,11 @@ export const merchantRoutes: RouteRecordRaw[] = [
     name: 'admin-shop',
     component: () => import('@/merchant/views/AdminShopView.vue'),
     meta: { ...base, tab: 'shop', depth: 1, title: '我的' },
+  },
+  {
+    path: '/admin/inventory',
+    name: 'admin-inventory',
+    component: () => import('@/merchant/views/AdminInventoryView.vue'),
+    meta: { ...base, depth: 2, title: '库存总览', toastTop: '12rem' },
   },
 ]

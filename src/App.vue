@@ -28,6 +28,11 @@ const tabItems = computed(() => (isAdmin.value ? merchantTabs : userTabs))
 
 // 仅一级 Tab 页显示底部导航；购物车、详情、制作页为全屏次级页
 const showTabbar = computed(() => route.meta.tab !== undefined)
+// 部分页面页头更高，提示下移，避免盖住刚变化的关键数字
+const toastOffset = computed(
+  () =>
+    (route.meta.toastTop as string | undefined) ?? (showTabbar.value ? '3.75rem' : '3.25rem'),
+)
 const activeTab = computed({
   get: () => (route.meta.tab as string) ?? (isAdmin.value ? 'dashboard' : 'craft'),
   set: (key) => {
@@ -75,7 +80,7 @@ watch(
     </main>
 
     <OTabbar v-if="showTabbar" v-model="activeTab" :items="tabItems" />
-    <OToastHost :top-offset="showTabbar ? '3.75rem' : '3.25rem'" />
+    <OToastHost :top-offset="toastOffset" />
   </div>
 </template>
 

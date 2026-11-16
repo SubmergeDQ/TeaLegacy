@@ -8,7 +8,7 @@ import OIcon from '@/components/oil-ui/OIcon.vue'
 import ONavBar from '@/components/oil-ui/ONavBar.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import { getCraftByProduct } from '@/catalog/craft'
-import { getProduct } from '@/catalog/shop'
+import { getAdminProduct } from '@/catalog/admin/read'
 import { useCartStore } from '@/stores/cart'
 import { useCraftStore } from '@/stores/craft'
 import { formatPrice } from '@/utils/format'
@@ -18,7 +18,8 @@ const router = useRouter()
 const cart = useCartStore()
 const craft = useCraftStore()
 
-const product = computed(() => getProduct(Number(route.params.id)))
+// 读商家端合并层：改价即时生效；下架后详情不可访问，回商城
+const product = computed(() => getAdminProduct(Number(route.params.id)))
 
 // 这款茶能不能"亲手做"：能，且已经做过，就在详情页留一行记录
 const craftTea = computed(() =>
@@ -33,9 +34,10 @@ const lead = computed(() => {
   return cut > 0 ? first.slice(0, cut + 1) : first
 })
 
-// 直达无效链接时回商城
+// 直达无效或已下架的商品时回商城
 watchEffect(() => {
-  if (!product.value) router.replace('/shop')
+  const value = product.value
+  if (!value || !value.online) router.replace('/shop')
 })
 
 function goBack() {

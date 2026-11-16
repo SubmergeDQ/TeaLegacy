@@ -49,7 +49,8 @@ npm run dev        # http://localhost:5173
 | `src/components/oil-ui/`、`src/styles/`、`src/utils/`、`src/catalog/` | 共享 | 组件库、设计令牌、数据 |
 | `src/stores/appRole.ts`、`src/components/RoleSwitcher.vue`、`src/views/WelcomeView.vue` | 共享 | 身份选择与切换 |
 | `src/merchant/` | **商家端** | 路由 / 页面 / 商家端组件 / 登录态 |
-| `src/catalog/admin/` | 商家端（待建） | 数据契约、Mock、指标、合并读取层 |
+| `src/catalog/admin/` | 商家端（已建） | 数据契约、Mock、指标、合并读取层、三个 store |
+| `src/composables/` | 商家端 | 下拉刷新、上拉加载 |
 | `docs/` | 全部 | 架构、方案、决策、开发指南 |
 | `android/` | 用户端壳 | Capacitor 原生工程 |
 
@@ -67,21 +68,26 @@ npm run dev        # http://localhost:5173
 
 - ✅ 用户端（制茶 + 商城 + 购物车，可打 APK v1.0.1）
 - ✅ 仓库按两端整理、文档体系与方案定稿（方案 A）
-- ✅ 商家端 M0 骨架：登录 / 守卫 / 4 个 Tab / 2 个二级页占位 / 返回键
+- ✅ 商家端 M0 骨架：登录 / 守卫 / 4 个 Tab / 返回键
 - ✅ 首次启动身份选择 + 两端设置内切换
-- ⏳ 商家端 P0 功能未开发（见下节顺序）
+- ✅ 商家端 P0：数据层（Mock 48 单 / 指标 / 覆盖层）、12 个增量组件、6 个页面、C 端下单闭环
+- ✅ 商家端增强：多选批量发货、库存总览（低库存排序 / 入库出库 / 流水）
+- ⏳ 关于页、数据详情与评价（P2）、真机验收未做
 
-## 7. 继续开发的顺序（P0）
+## 7. 继续开发的顺序（P0 已完成，P1 待办）
 
 每步完成标准：`typecheck` + `build` 通过、用户端 5 页回归、文档同步。
 
-1. **数据层** `src/catalog/admin/`：`types.ts` → `mock/orders.ts`（确定性 48 单）→ `metrics.ts`（KPI/趋势纯函数）→ `index.ts`（只读源 + 覆盖层合并读取）
-2. **增量组件** `src/components/oil-ui/`：`OTag / OSwitch / OStatCard / OCell / OSearchBar / OSegmented / OSheet / OEmpty / OTimeline / OFormItem` + `charts/` 三个自绘 SVG 图 + `usePullRefresh / useInfiniteScroll`
-3. **概览看板** `src/merchant/views/AdminDashboardView.vue`（KPI 四宫格 + 7 日折线 + 待办 + 热销 Top5）
-4. **商品** `AdminProductsView.vue`（列表/筛选/上下架）+ `AdminProductEditView.vue`（价格/库存/文案/保存校验）
-5. **订单** `AdminOrdersView.vue`（状态分段 + 分页）+ `AdminOrderDetailView.vue`（明细/时间轴/发货）
-6. **店铺设置** 替换 `AdminShopView.vue` 里的「待开发」清单（资料/通知/演示数据重置）
-7. **联动（P1，演示亮点）** `src/views/CartView.vue` 结算时调用后台订单 store，新增一条待付款订单
+1. ~~数据层 `src/catalog/admin/`：types → mock → metrics → 覆盖层与合并读取~~ ✅
+2. ~~增量组件：OTag/OSwitch/OStatCard/OCell/OSearchBar/OSegmented/OSheet/OEmpty/OTimeline/OFormItem + OChartLine + 两个 composable~~ ✅
+3. ~~概览看板~~ ✅
+4. ~~商品列表 / 商品编辑~~ ✅
+5. ~~订单列表 / 订单详情（发货、取消、备注）~~ ✅
+6. ~~店铺设置~~ ✅
+7. ~~联动：C 端结算写入后台订单~~ ✅（状态记 `paid`，与「支付成功」一致）
+8. ~~批量发货（多选 + 统一承运商）~~ ✅
+9. ~~库存总览 `/admin/inventory`（入库/出库 + 流水）~~ ✅
+10. 待做：关于页、真机手势与 APK 回归
 
 ## 8. 代码约定
 
