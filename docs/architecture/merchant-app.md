@@ -266,12 +266,12 @@ export const merchantRoutes: RouteRecordRaw[] = [
 
 | 入口 | 行为 |
 |---|---|
-| 首次启动 `/welcome` | 选择用户端 / 商家端，写 `tea-legacy.app.role.v1`（localStorage） |
+| 每次启动 `/welcome` | 选择用户端 / 商家端，写 `tea-legacy.app.role.session.v1`（sessionStorage，关闭应用失效） |
 | 用户端商城页齿轮 → 设置 | `RoleSwitcher` 面板：进入商家端 / 重新选择身份 |
 | 商家端「我的」页 | 同一个 `RoleSwitcher`：切换回用户端 / 重新选择身份 |
 | 商城页「普」印长按 800ms | 快捷入口：置身份为商家端并跳登录 |
 
-根路由 `/` 按已存身份重定向：`merchant` → 概览（未登录则登录页）、`user` → `/craft`、未选择 → `/welcome`。
+根路由 `/` 按当前会话身份重定向：`merchant` → 概览（未登录则登录页）、`user` → `/craft`、未选择 → `/welcome`。
 
 ### 4.4 组件扩展清单（Oil UI Admin 增量）
 

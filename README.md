@@ -23,12 +23,14 @@ TeaLegacy/
 │     └─ views/                 登录 + 6 个页面（4 个一级 Tab + 2 个二级页）
 ├─ docs/
 │  ├─ README.md                 文档索引
+│  ├─ DEVELOPMENT.md            开发指南（新设备上手 / 目录 / P0 顺序 / 约定）
 │  ├─ architecture/
 │  │  ├─ user-app.md            用户端架构说明（技术栈/目录/适配/路由/打包）
 │  │  └─ merchant-app.md        商家端开发文档（页面规格/数据层/里程碑/验收）
 │  ├─ plans/                    落地方案对比与 4 个方案细节（A 已选定）
 │  ├─ DECISIONS.md              决策记录（D-001～D-004 已定稿）
 │  └─ design/                   设计过程记录约定
+├─ CHANGELOG.md                 变更记录（按日期）
 ├─ android/                     Capacitor 原生壳
 ├─ .github/workflows/           Android CI
 └─ index.html / vite.config.ts / capacitor.config.ts
@@ -45,7 +47,7 @@ TeaLegacy/
 
 ## 身份与入口
 
-- **首次启动**：进入身份选择页，选「用户端」或「商家端」；选择结果存 localStorage，下次启动直接进上次的身份。
+- **每次启动**：先进入身份选择页，选「用户端」或「商家端」；本次会话内有效（sessionStorage），关闭应用后下次重新选择。
 - **随时切换**：用户端商城页右上角**齿轮 → 设置 → 进入商家端 / 重新选择身份**；商家端「我的」页有同样的切换面板。
 - **快捷入口**：商城页「普」印**长按 800ms** 直接进商家端（演示用）。
 - **商家端登录**：`tea-admin` / `123456`（登录页有「填入演示账号」按钮）；登录态存 sessionStorage，关闭应用即失效。
@@ -84,10 +86,12 @@ cd android && ./gradlew assembleDebug
 
 ## 文档
 
+- 开发指南（新设备先读）：[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
 - 用户端：[docs/architecture/user-app.md](./docs/architecture/user-app.md)
 - 商家端：[docs/architecture/merchant-app.md](./docs/architecture/merchant-app.md)
 - 方案：[docs/plans/](./docs/plans/)
 - 决策：[docs/DECISIONS.md](./docs/DECISIONS.md)
+- 变更记录：[CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 
