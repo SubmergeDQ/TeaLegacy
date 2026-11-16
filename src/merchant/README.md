@@ -1,43 +1,45 @@
-# 商家端（预留）
+# 商家端（Merchant）
 
-> **状态：仅目录，暂无实现。** 落地方案待定，见 [docs/plans/](../../docs/plans/)。
+> **状态：M0 骨架已落地（2026-11-16）。** 方案已定：A 单应用 + 路由分区，见 [docs/DECISIONS.md](../../docs/DECISIONS.md)。
+> 页面内容按 [docs/architecture/merchant-app.md](../../docs/architecture/merchant-app.md) 逐页替换占位。
 
-## 这里放什么
+## 怎么进
 
-商家管理后台的**页面与业务代码**。方案定稿前不要在此写代码——目录如何组织依赖选定的方案（A/B/C/D），见 `docs/plans/00-方案对比.md`。
-
-## 选定方案后怎么落地
-
-1. 在 `docs/DECISIONS.md` 的 D-001 打勾，写下结论。
-2. 按对应方案文档（`docs/plans/01`~`04`）执行迁移，本目录随之调整。
-3. 业务实现严格按 [docs/architecture/merchant-app.md](../../docs/architecture/merchant-app.md) 的章节推进（页面规格 → 数据层 → 组件 → 手感）。
-
-## 预留子目录
-
-| 目录 | 用途 |
+| 方式 | 说明 |
 |---|---|
-| `views/` | 页面（登录、概览看板、商品列表/编辑、订单列表/详情、店铺设置） |
-| `components/` | 商家端专用组件（商品卡、订单卡、发货弹层等） |
-| `stores/` | Pinia：登录态、商品覆盖层、订单状态机 |
-| `router/` | 商家端路由表（全部懒加载） |
+| 用户端隐藏入口 | 商城页左上角「普」印**长按 800ms** → `/admin/login` |
+| 直接访问 | `#/admin/login`（Web / 调试） |
+| 演示账号 | `tea-admin` / `123456`（登录页有「填入演示账号」按钮） |
 
-数据层与 Mock 数据按开发文档放在 `src/catalog/admin/`（若选方案 C 再迁入 `packages/data`）。
+登录态存 `sessionStorage`（键 `tea-legacy.admin.session.v1`），关闭应用即失效。
 
-## P0 页面清单
+## 现有文件（M0）
 
-| 页面 | 路由（暂定） | 优先级 |
-|---|---|---|
-| 商家登录 | `/admin/login` | P0 |
-| 概览看板 | `/admin/dashboard` | P0 |
-| 商品列表 | `/admin/products` | P0 |
-| 商品编辑 | `/admin/products/:id` | P0 |
-| 订单列表 | `/admin/orders` | P0 |
-| 订单详情 | `/admin/orders/:no` | P0 |
-| 店铺设置 | `/admin/shop` | P0 |
+```
+src/merchant/
+├─ router/index.ts            路由表：/admin/* 全部懒加载，meta: admin/tab/depth/title
+├─ stores/adminAuth.ts        模拟登录态（本地校验，sessionStorage）
+├─ components/ComingSoon.vue  M0 占位卡（标题 + 待办清单 + 说明）
+└─ views/
+   ├─ AdminLoginView.vue      登录页（已实现，含错误提示与 loading）
+   ├─ AdminDashboardView.vue  概览（占位）
+   ├─ AdminProductsView.vue   商品列表（占位）
+   ├─ AdminProductEditView.vue 编辑商品（占位，depth 2）
+   ├─ AdminOrdersView.vue     订单列表（占位）
+   ├─ AdminOrderDetailView.vue 订单详情（占位，depth 2）
+   └─ AdminShopView.vue       我的 / 店铺设置（占位）
+```
 
-> 路由前缀 `/admin` 为暂定值，方案 D（多入口）下可能改为 `/merchant` 或独立入口。
+## 与用户端的边界
 
-## 禁止事项
+- **允许**：依赖 `@/components/oil-ui`、`@/styles`、`@/utils`、`@/catalog`（只读数据）。
+- **禁止**：反向 import 用户端 view / store；商家端数据写入统一走 `src/catalog/admin/`（覆盖层）。
+- 外壳复用 `App.vue`：`tabItems` 按 `route.meta.admin` 切换；商家端一级页必须有 `meta.tab`，二级页 `meta.depth: 2`。
 
-- 不要把商家端代码直接写进 `src/views/`、`src/stores/` 等用户端顶层目录（方案定稿后统一迁移，避免二次搬动）。
-- 不要反向依赖用户端 view；只允许依赖共享层（Oil UI、设计令牌、`catalog` 数据）。
+## 下一步（P0，按依赖顺序）
+
+1. 数据层：`src/catalog/admin/`（types → 确定性 Mock 订单 → 指标纯函数 → 覆盖层与合并读取层）
+2. 增量组件：`OTag/OSwitch/OStatCard/OSheet/OTimeline/OChartLine|Bar|Donut` 等
+3. 页面：概览看板 → 商品列表/编辑 → 订单列表/详情 → 店铺设置
+4. 与用户端联动：C 端模拟下单写入后台订单（P1，闭环演示关键）
+5. 验收：见 [merchant-app.md](../../docs/architecture/merchant-app.md) 第 7 节

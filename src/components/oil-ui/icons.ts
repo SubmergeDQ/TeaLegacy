@@ -29,4 +29,13 @@ export const icons: Record<string, string> = {
   play: '<path d="M8.5 5.8v12.4L19 12z" fill="currentColor" stroke="none"/>',
   pause: '<path d="M9 5.5v13M15 5.5v13" stroke-width="2.4"/>',
   replay: '<path d="M4.5 12a7.5 7.5 0 1 0 2.8-5.8"/><path d="M4.5 4.5V9h4.5"/>',
+  // —— 商家端（后台导航与操作）——
+  chart:
+    '<path d="M4.5 19.5h15"/><path d="M7.2 19.5v-6.2"/><path d="M12 19.5V8.4"/><path d="M16.8 19.5v-4.2"/>',
+  box:
+    '<path d="M4.6 8.3 12 4.6l7.4 3.7v7.4L12 19.4l-7.4-3.7V8.3Z"/><path d="m4.6 8.3 7.4 3.7 7.4-3.7"/><path d="M12 12v7.4"/>',
+  receipt:
+    '<path d="M6.6 3.6h10.8v16.8l-2.1-1.5-2.1 1.5-2.1-1.5-2.1 1.5-2.1-1.5V3.6Z"/><path d="M9.2 8h5.6M9.2 11.6h5.6M9.2 15.2h3.6"/>',
+  store:
+    '<path d="M5 9.4V19.4h14V9.4"/><path d="M4.4 9.4 6.1 4.6h11.8l1.7 4.8"/><path d="M9.6 19.4v-5.2h4.8v5.2"/>',
 }

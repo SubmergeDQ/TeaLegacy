@@ -9,16 +9,31 @@ import { hideToast } from '@/components/oil-ui/toast'
 const route = useRoute()
 const router = useRouter()
 
-const tabItems: TabItem[] = [
+// 用户端与商家端各有一组一级 Tab，共用同一套外壳。
+// 方案 A：商家端只是同一应用里的另一棵路由树（/admin/*）。
+const userTabs: TabItem[] = [
   { key: 'craft', icon: 'tea', label: '制茶' },
   { key: 'shop', icon: 'jar', label: '商城' },
 ]
 
+const merchantTabs: TabItem[] = [
+  { key: 'dashboard', icon: 'chart', label: '概览' },
+  { key: 'products', icon: 'box', label: '商品' },
+  { key: 'orders', icon: 'receipt', label: '订单' },
+  { key: 'shop', icon: 'store', label: '我的' },
+]
+
+const isAdmin = computed(() => route.meta.admin === true)
+const tabItems = computed(() => (isAdmin.value ? merchantTabs : userTabs))
+
 // 仅一级 Tab 页显示底部导航；购物车、详情、制作页为全屏次级页
 const showTabbar = computed(() => route.meta.tab !== undefined)
 const activeTab = computed({
-  get: () => (route.meta.tab as string) ?? 'craft',
-  set: (key) => router.push(key === 'shop' ? '/shop' : '/craft'),
+  get: () => (route.meta.tab as string) ?? (isAdmin.value ? 'dashboard' : 'craft'),
+  set: (key) => {
+    if (isAdmin.value) router.push(`/admin/${key}`)
+    else router.push(key === 'shop' ? '/shop' : '/craft')
+  },
 })
 
 // 页面转场与滚动记忆：进次级页从右滑入、返回反向、Tab 间淡换；

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import OBadge from '@/components/oil-ui/OBadge.vue'
@@ -26,6 +26,23 @@ function openCart() {
   router.push('/cart')
 }
 
+// 隐藏入口：长按「普」印进入商家中心（演示用，不打扰普通浏览）
+let sealTimer: number | undefined
+
+function startSealPress() {
+  window.clearTimeout(sealTimer)
+  sealTimer = window.setTimeout(() => {
+    showToast({ text: '进入商家中心' })
+    void router.push('/admin/login')
+  }, 800)
+}
+
+function cancelSealPress() {
+  window.clearTimeout(sealTimer)
+}
+
+onBeforeUnmount(() => window.clearTimeout(sealTimer))
+
 function addToCart(payload: { id: number; from: HTMLElement }) {
   const product = getProduct(payload.id)
   if (!product) return
@@ -47,7 +64,17 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
     <header class="shop__head">
       <div class="shop__brand">
         <h1 class="shop__logo">茶承</h1>
-        <span class="shop__seal" aria-hidden="true">普</span>
+        <button
+          type="button"
+          class="shop__seal"
+          aria-label="商家入口（长按）"
+          @pointerdown="startSealPress"
+          @pointerup="cancelSealPress"
+          @pointerleave="cancelSealPress"
+          @pointercancel="cancelSealPress"
+        >
+          普
+        </button>
       </div>
       <button
         ref="cartAnchor"
@@ -131,6 +158,9 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
 // 字标旁的方印：克制的品牌标记，不靠拉字距
 .shop__seal {
   display: flex;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
   align-items: center;
   justify-content: center;
   width: 1.125rem;

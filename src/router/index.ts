@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+import { useAdminAuthStore } from '@/merchant/stores/adminAuth'
+import { merchantRoutes } from '@/merchant/router'
 import CraftSelectView from '@/views/CraftSelectView.vue'
 import ShopView from '@/views/ShopView.vue'
 
@@ -40,8 +42,24 @@ const router = createRouter({
       component: () => import('@/views/CartView.vue'),
       meta: { depth: 2 },
     },
+    // 商家端（方案 A：同一应用内的路由分区），全部懒加载
+    ...merchantRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/craft' },
   ],
+})
+
+// 商家端登录守卫：未登录只能停在 /admin/login；
+// 已登录访问登录页则直接进概览。
+router.beforeEach((to) => {
+  if (to.meta.admin !== true) return
+  const auth = useAdminAuthStore()
+  if (to.name !== 'admin-login' && !auth.logged) {
+    return { name: 'admin-login', query: { redirect: to.fullPath } }
+  }
+  if (to.name === 'admin-login' && auth.logged) {
+    return { name: 'admin-dashboard' }
+  }
+  return
 })
 
 export default router

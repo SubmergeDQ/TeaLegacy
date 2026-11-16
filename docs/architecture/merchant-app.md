@@ -6,10 +6,10 @@
 
 ---
 
-> **仓库状态**：用户端已实现；商家端为预留状态（`src/merchant/`，无代码）。
-> 落地方案尚未选定，见 [plans/00-方案对比.md](../plans/00-方案对比.md) 与 [DECISIONS.md](../DECISIONS.md)。
-> **目录以选定方案为准**：若选方案 A，本文的 `src/views/admin/*` 对应落到 `src/merchant/views/*`
-> （`src/merchant/README.md` 已约定），其余章节不变。
+> **仓库状态**：用户端已实现；商家端方案已定（A 单应用路由分区），M0 骨架已落地（`src/merchant/`：登录 / 路由 / 4 个 Tab 占位）。
+> 方案与决策见 [plans/00-方案对比.md](../plans/00-方案对比.md)、[DECISIONS.md](../DECISIONS.md)。
+> **目录以方案 A 为准**：商家端页面落在 `src/merchant/views/*`，路由 `src/merchant/router/index.ts`，
+> 数据层 `src/catalog/admin/*`（P0 阶段建）；本文 4.1–4.3 已按实际实现修订。
 
 ## 0. 结论速览
 
@@ -201,111 +201,66 @@ A4 商品编辑                  │ 小青柑 ×1   ¥128     │
 
 ## 4. 技术设计
 
-### 4.1 目录结构（新增部分，`+` 标新增，`~` 标修改）
+### 4.1 目录结构（方案 A 实际落地）
 
 ```
 src/
-├─ main.ts                      ~ 注册 admin 路由守卫
-├─ App.vue                      ~ 3 处 admin 判断
+├─ main.ts                      ~ 返回键 fallback 按 meta.section 区分两端
+├─ App.vue                      ~ 按 meta.admin 切换底部 Tab（复用同一套外壳）
 ├─ router/
-│  ├─ index.ts                  ~ 挂载 adminRoutes、守卫
-│  └─ admin.ts                  + 后台路由表（全部懒加载）
-├─ views/
-│  └─ admin/
-│     ├─ AdminLoginView.vue     +
-│     ├─ AdminDashboardView.vue +
-│     ├─ AdminProductsView.vue  +
-│     ├─ AdminProductEditView.vue +
-│     ├─ AdminOrdersView.vue    +
-│     ├─ AdminOrderDetailView.vue +
-│     ├─ AdminShopView.vue      +
-│     ├─ AdminInventoryView.vue +（P1）
-│     └─ AdminAboutView.vue     +（P1）
-├─ layouts/
-│  └─ AdminLayout.vue           + 后台外壳（NavBar 区 + 内容 + 4 Tab）
-├─ components/
-│  ├─ oil-ui/                   ~ 增量注册（见 4.4）
-│  │  ├─ OTag.vue  OSwitch.vue  OCell.vue  OStatCard.vue
-│  │  ├─ OSearchBar.vue  OSegmented.vue  OSheet.vue
-│  │  ├─ OEmpty.vue  OTimeline.vue  OFormItem.vue
-│  │  ├─ charts/OChartLine.vue  OChartBar.vue  OChartDonut.vue
-│  │  ├─ icons.ts               ~ 新增 10 个图标
-│  │  └─ index.ts               ~ 注册新组件
-│  └─ admin/
-│     ├─ ProductAdminCard.vue   +
-│     ├─ OrderAdminCard.vue     +
-│     ├─ KpiGrid.vue            +
-│     ├─ StockBadge.vue         +
-│     └─ ShipSheet.vue          +
-├─ catalog/
-│  └─ admin/                    + ★ 后台数据层（唯一写入点）
-│     ├─ types.ts               + 数据契约
-│     ├─ overrides.ts           + 商品覆盖层（读/写/重置）
-│     ├─ mock/orders.ts         + 确定性 Mock 订单生成器
-│     ├─ mock/reviews.ts        +（P2）
-│     ├─ metrics.ts             + 指标聚合（纯函数，可单测）
-│     └─ index.ts               + 合并读取层对外出口
-├─ stores/
-│  ├─ adminAuth.ts              + 登录态 / 店铺信息
-│  ├─ adminCatalog.ts           + overrides + 库存流水
-│  └─ adminOrders.ts            + 订单状态机 + 发货 + 备注
-├─ composables/
-│  ├─ usePullRefresh.ts         +
-│  └─ useInfiniteScroll.ts      +
-└─ styles/
-   └─ variables.scss / base.scss ~ 新增 4 个语义色令牌
+│  └─ index.ts                  ~ 追加 merchantRoutes、登录守卫
+├─ merchant/                    ★ 商家端（M0 骨架已建）
+│  ├─ router/index.ts           + 路由表（全部懒加载）
+│  ├─ views/                    + 登录 / 概览 / 商品 / 商品编辑 / 订单 / 订单详情 / 我的
+│  ├─ components/ComingSoon.vue + 占位卡（M0）
+│  └─ stores/adminAuth.ts       + 模拟登录态（sessionStorage）
+├─ components/oil-ui/           ~ 增量注册（见 4.4），icons.ts 已加 4 个导航图标
+├─ catalog/admin/               + ★ 数据层（P0 阶段建：types / mock / metrics / 读取层）
+├─ composables/                 + usePullRefresh / useInfiniteScroll（P0 阶段建）
+└─ styles/                      ~ 新增 4 个语义色令牌（P0 阶段）
 ```
 
-### 4.2 路由方案
+### 4.2 路由方案（已实现）
 
 ```ts
-// src/router/admin.ts（要点）
-const adminRoutes: RouteRecordRaw[] = [{
-  path: '/admin',
-  component: () => import('@/layouts/AdminLayout.vue'),
-  meta: { admin: true, section: 'admin', depth: 1 },
-  redirect: '/admin/dashboard',
-  children: [
-    { path: 'dashboard', component: () => import('@/views/admin/AdminDashboardView.vue'),
-      meta: { admin: true, tab: 'dashboard', depth: 1, title: '概览' } },
-    { path: 'products',  ... meta: { tab: 'products', depth: 1, title: '商品' } },
-    { path: 'products/:id', component: () => import('@/views/admin/AdminProductEditView.vue'),
-      meta: { depth: 2, title: '编辑商品' } },
-    { path: 'orders',    ... meta: { tab: 'orders', depth: 1 } },
-    { path: 'orders/:no', component: ..., meta: { depth: 2 } },
-    { path: 'shop',      ... meta: { tab: 'shop', depth: 1 } },
-    { path: 'inventory', component: ..., meta: { depth: 2 } },
-  ],
-}]
+// src/merchant/router/index.ts（实际实现，摘要）
+const base = { admin: true, section: 'admin' }
+
+export const merchantRoutes: RouteRecordRaw[] = [
+  { path: '/admin/login', name: 'admin-login',
+    component: () => import('@/merchant/views/AdminLoginView.vue'),
+    meta: { ...base, depth: 1, title: '商家登录' } },
+  { path: '/admin', redirect: '/admin/dashboard', meta: { ...base, depth: 1 } },
+  { path: '/admin/dashboard', ... meta: { tab: 'dashboard', depth: 1 } },
+  { path: '/admin/products',  ... meta: { tab: 'products', depth: 1 } },
+  { path: '/admin/products/:id',
+    component: () => import('@/merchant/views/AdminProductEditView.vue'),
+    meta: { ...base, depth: 2 } },
+  { path: '/admin/orders',    ... meta: { tab: 'orders', depth: 1 } },
+  { path: '/admin/orders/:no', meta: { ...base, depth: 2 } },
+  { path: '/admin/shop',      ... meta: { tab: 'shop', depth: 1 } },
+]
 ```
 
-**`App.vue` 的三处改动**（务必最小化，避免影响 C 端）：
+`src/router/index.ts` 里把 `...merchantRoutes` 插在兜底路由之前；`beforeEach` 做登录守卫（未登录跳 `/admin/login?redirect=…`，已登录访问登录页跳概览）。
 
-| 位置 | 现状 | 改为 |
-|---|---|---|
-| `showTabbar` | `route.meta.tab !== undefined` | `route.meta.tab !== undefined && !route.meta.admin`（后台 TabBar 由 `AdminLayout` 自绘） |
-| `keep-alive include` | `"ShopView,CraftSelectView"` | 追加 `"AdminDashboardView,AdminProductsView"`（可选） |
-| 返回键 fallback（`main.ts`） | `router.replace('/craft')` | 按 `meta.section` 返回 `/admin/dashboard` 或 `/craft` |
+**对现有代码的实际改动**：
 
-**守卫**：`router.beforeEach` 里判断 `to.meta.admin && to.name !== 'admin-login'`，未登录跳 `/admin/login`；登录后跳 `redirect`。登录态放 `sessionStorage`（`tea-legacy.admin.session.v1`），关闭 App 即失效，符合演示预期。
+| 位置 | 改动 |
+|---|---|
+| `App.vue` | 新增 `userTabs` / `merchantTabs`，`tabItems` 按 `meta.admin` 切换；`activeTab` setter 区分两端路径 |
+| `router/index.ts` | 追加 `...merchantRoutes` + 登录守卫（约 20 行） |
+| `main.ts` | 返回键 fallback 按 `meta.section` 回 `/admin/dashboard` 或 `/craft` |
+| `views/ShopView.vue` | 品牌区「普」印改为按钮，长按 800ms 进 `/admin/login`（演示隐藏入口） |
 
-**转场**：后台内部沿用 `depth` 驱动的前进/返回动画；C 端 ↔ 后台切换 depth 相同走 `page-fade`，无需改转场逻辑。
+> 原设计计划独立 `AdminLayout` + 自绘 TabBar；M0 实现改为**复用 `App.vue` 外壳**：商家端只是另一组一级 Tab（`meta.tab` 语义相同），转场、滚动记忆、Toast、返回键全部沿用，少一层嵌套滚动容器。将来商家端需要自己的顶栏或侧滑时再抽 `AdminLayout`。
 
-### 4.3 AdminLayout 外壳
+### 4.3 外壳与导航（M0 实际）
 
-```
-┌ .admin-shell（height:100%, padding-top: var(--o-safe-top)）
-│ ┌ <main class="admin-body">  ← 独立滚动容器，overscroll-behavior:contain
-│ │    <router-view>（页面自带 sticky 头）
-│ └
-│ <OTabbar :items="adminTabs" v-model="activeTab" />  ← 复用现成组件
-│ <OToastHost />（由 App.vue 已有）
-└
-```
-
-- 复用 `OTabbar`（4 项：概览/商品/订单/我的），图标新增 `chart / box / receipt / store`。
-- 二级页用 `ONavBar`（已有组件，带返回 + 右侧插槽）。
-- 滚动位置记忆与转场交给 `App.vue` 已实现的机制，`AdminLayout` 不重复实现。
+- 底部导航复用 `OTabbar`：概览 `chart` / 商品 `box` / 订单 `receipt` / 我的 `store`（图标已加进 `icons.ts`）。
+- 登录页无 `meta.tab`，不显示底部导航；二级页 `meta.depth: 2` 全屏 + 返回栏（占位页用 `ONavBar`）。
+- 原生返回键：`meta.depth > 1` 回上一页，一级页退出；`/admin/*` 的 fallback 回 `/admin/dashboard`。
+- 滚动位置与页面转场直接沿用 `App.vue` 现有逻辑，无需额外代码。
 
 ### 4.4 组件扩展清单（Oil UI Admin 增量）
 

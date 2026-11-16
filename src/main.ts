@@ -18,10 +18,12 @@ createApp(App).use(createPinia()).use(router).use(OilUI).mount('#app')
 // 不看 WebView 的 canGoBack —— hash 路由下它并不可靠。
 if (Capacitor.isNativePlatform()) {
   void NativeApp.addListener('backButton', () => {
-    const depth = (router.currentRoute.value.meta.depth as number) ?? 1
+    const current = router.currentRoute.value
+    const depth = (current.meta.depth as number) ?? 1
     if (depth > 1) {
+      const fallback = current.meta.section === 'admin' ? '/admin/dashboard' : '/craft'
       if (window.history.length > 1) window.history.back()
-      else void router.replace('/craft')
+      else void router.replace(fallback)
     } else {
       void NativeApp.exitApp()
     }

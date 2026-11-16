@@ -5,10 +5,10 @@
 | 文档 | 内容 | 状态 |
 |---|---|---|
 | [architecture/user-app.md](./architecture/user-app.md) | 用户端完整架构说明（技术栈、目录、适配、路由、状态、打包 APK） | 已实现 |
-| [architecture/merchant-app.md](./architecture/merchant-app.md) | 商家端开发文档（页面规格、数据层、组件增量、里程碑、验收） | 待开发 |
-| [plans/00-方案对比.md](./plans/00-方案对比.md) | 商家端 4 个落地方案总览与推荐 | ⏳ 待选 |
-| plans/01-04 | 四个方案的目标结构、迁移步骤与工期 | ⏳ 待选 |
-| [DECISIONS.md](./DECISIONS.md) | 决策记录（ADR）：方案、组件库、图表、分发形态 | ⏳ 待填写 |
+| [architecture/merchant-app.md](./architecture/merchant-app.md) | 商家端开发文档（页面规格、数据层、组件增量、里程碑、验收） | M0 已落地，P0 待开发 |
+| [plans/00-方案对比.md](./plans/00-方案对比.md) | 商家端 4 个落地方案总览与推荐 | ✅ 已选 A |
+| plans/01-04 | 四个方案的目标结构、迁移步骤与工期 | ✅ A 已落地 M0 |
+| [DECISIONS.md](./DECISIONS.md) | 决策记录（ADR）：方案、组件库、图表、分发形态 | ✅ 已定稿 |
 | [design/README.md](./design/README.md) | 设计过程记录约定 | 约定 |
 
 ## 约定

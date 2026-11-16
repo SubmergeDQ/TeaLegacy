@@ -1,7 +1,7 @@
 # 用户端（C 端）架构说明
 
 > 本文原为仓库根 README，2026-11-16 仓库按「用户端 / 商家端」拆分后归档于此。
-> 用户端代码当前仍在 `src/` 顶层；商家端为预留状态，见 [merchant-app.md](./merchant-app.md)。
+> 用户端代码当前仍在 `src/` 顶层；商家端为 `src/merchant/`（M0 骨架），见 [merchant-app.md](./merchant-app.md)。
 > 返回 [文档索引](../README.md)。
 
 以「普洱茶非遗文化」为主题的移动端优先 H5 应用，用 Capacitor 打包为 Android APK（原生工程在 `android/`）。
