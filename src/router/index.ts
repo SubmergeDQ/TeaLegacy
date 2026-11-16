@@ -1,7 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import { useAdminAuthStore } from '@/merchant/stores/adminAuth'
+import { isAdminSessionActive, useAdminAuthStore } from '@/merchant/stores/adminAuth'
 import { merchantRoutes } from '@/merchant/router'
+import { readStoredRole } from '@/stores/appRole'
 import CraftSelectView from '@/views/CraftSelectView.vue'
 import ShopView from '@/views/ShopView.vue'
 
@@ -11,7 +12,23 @@ import ShopView from '@/views/ShopView.vue'
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', redirect: '/craft' },
+    // 首次启动：没有身份时先进选择页；之后按已选身份进对应端
+    {
+      path: '/',
+      redirect: () => {
+        const role = readStoredRole()
+        if (role === 'merchant') {
+          return isAdminSessionActive() ? '/admin/dashboard' : '/admin/login'
+        }
+        return role === 'user' ? '/craft' : '/welcome'
+      },
+    },
+    {
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('@/views/WelcomeView.vue'),
+      meta: { depth: 1, title: '选择身份' },
+    },
     {
       path: '/craft',
       name: 'craft',

@@ -14,6 +14,10 @@ const SESSION_KEY = 'tea-legacy.admin.session.v1'
 export const DEMO_ACCOUNT = 'tea-admin'
 export const DEMO_PASSWORD = '123456'
 
+export function isAdminSessionActive(): boolean {
+  return loadSession() !== null
+}
+
 function loadSession(): number | null {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY)

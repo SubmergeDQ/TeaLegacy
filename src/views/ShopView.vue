@@ -3,15 +3,20 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import OBadge from '@/components/oil-ui/OBadge.vue'
+import ODialog from '@/components/oil-ui/ODialog.vue'
 import OIcon from '@/components/oil-ui/OIcon.vue'
+import RoleSwitcher from '@/components/RoleSwitcher.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import ProductCard from '@/components/shop/ProductCard.vue'
 import { banner, getProduct, products } from '@/catalog/shop'
+import { useAppRoleStore } from '@/stores/appRole'
 import { useCartStore } from '@/stores/cart'
 import { bump, flyToCart } from '@/utils/motion'
 
 const router = useRouter()
 const cart = useCartStore()
+const role = useAppRoleStore()
+const settingsOpen = ref(false)
 
 const cartAnchor = ref<HTMLElement>()
 // 首次进场动画只播一次；KeepAlive 下重新激活不重播
@@ -32,6 +37,7 @@ let sealTimer: number | undefined
 function startSealPress() {
   window.clearTimeout(sealTimer)
   sealTimer = window.setTimeout(() => {
+    role.choose('merchant')
     showToast({ text: '进入商家中心' })
     void router.push('/admin/login')
   }, 800)
@@ -76,15 +82,25 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
           普
         </button>
       </div>
-      <button
-        ref="cartAnchor"
-        class="shop__cart"
-        aria-label="打开购物车"
-        @click="openCart"
-      >
-        <OIcon name="bag" :size="22" />
-        <OBadge :value="cart.count" class="shop__badge" />
-      </button>
+      <div class="shop__actions">
+        <button
+          type="button"
+          class="shop__setting"
+          aria-label="设置"
+          @click="settingsOpen = true"
+        >
+          <OIcon name="gear" :size="20" />
+        </button>
+        <button
+          ref="cartAnchor"
+          class="shop__cart"
+          aria-label="打开购物车"
+          @click="openCart"
+        >
+          <OIcon name="bag" :size="22" />
+          <OBadge :value="cart.count" class="shop__badge" />
+        </button>
+      </div>
     </header>
 
     <section class="shop__banner" aria-label="茶山与茶饼">
@@ -120,6 +136,14 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
       </div>
     </section>
   </div>
+
+    <ODialog v-model="settingsOpen">
+      <div class="settings">
+        <h2 class="settings__title">设置</h2>
+        <RoleSwitcher />
+        <p class="settings__ver">茶承 TeaLegacy · 离线演示 v1.0.1</p>
+      </div>
+    </ODialog>
 </template>
 
 <style scoped lang="scss">
@@ -144,6 +168,49 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.shop__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shop__setting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: var(--o-muted);
+  transition: color var(--o-dur-press) linear;
+
+  &:active {
+    color: var(--o-title);
+  }
+}
+
+// 设置弹窗内容
+.settings {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.settings__title {
+  font-family: var(--o-font-serif);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--o-title);
+}
+
+.settings__ver {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--o-line);
+  font-size: 0.6875rem;
+  color: var(--o-disabled);
 }
 
 .shop__logo {

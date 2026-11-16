@@ -262,6 +262,17 @@ export const merchantRoutes: RouteRecordRaw[] = [
 - 原生返回键：`meta.depth > 1` 回上一页，一级页退出；`/admin/*` 的 fallback 回 `/admin/dashboard`。
 - 滚动位置与页面转场直接沿用 `App.vue` 现有逻辑，无需额外代码。
 
+**身份入口（2026-11-16 补充）**
+
+| 入口 | 行为 |
+|---|---|
+| 首次启动 `/welcome` | 选择用户端 / 商家端，写 `tea-legacy.app.role.v1`（localStorage） |
+| 用户端商城页齿轮 → 设置 | `RoleSwitcher` 面板：进入商家端 / 重新选择身份 |
+| 商家端「我的」页 | 同一个 `RoleSwitcher`：切换回用户端 / 重新选择身份 |
+| 商城页「普」印长按 800ms | 快捷入口：置身份为商家端并跳登录 |
+
+根路由 `/` 按已存身份重定向：`merchant` → 概览（未登录则登录页）、`user` → `/craft`、未选择 → `/welcome`。
+
 ### 4.4 组件扩展清单（Oil UI Admin 增量）
 
 | 组件 | 职责 | 关键接口 | 估算 |
