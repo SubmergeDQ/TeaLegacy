@@ -9,7 +9,7 @@ import ONavBar from '@/components/oil-ui/ONavBar.vue'
 import OStepper from '@/components/oil-ui/OStepper.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import CartSettleBar from '@/components/shop/CartSettleBar.vue'
-import { useAdminOrdersStore } from '@/catalog/admin'
+import { useAdminCatalogStore, useAdminOrdersStore } from '@/catalog/admin'
 import type { Product } from '@/catalog/shop'
 import { formatPrice } from '@/utils/format'
 import { delay } from '@/utils/motion'
@@ -19,6 +19,8 @@ const router = useRouter()
 const cart = useCartStore()
 // 结算写入商家端订单：后台「待发货」立刻 +1，演示闭环
 const adminOrders = useAdminOrdersStore()
+// 库存联动：结算成功后从商家端库存扣减，记一条 sale 流水
+const adminCatalog = useAdminCatalogStore()
 
 const paying = ref(false)
 const payShow = ref(false)
@@ -38,15 +40,15 @@ async function settle() {
   if (paying.value || cart.isEmpty) return
   paying.value = true
   await delay(900)
+  const lines = cart.detailed.map((line) => ({
+    productId: line.product.id,
+    name: line.product.name,
+    price: line.product.price,
+    qty: line.qty,
+  }))
   paidAmount.value = cart.total
-  adminOrders.createFromCart(
-    cart.detailed.map((line) => ({
-      productId: line.product.id,
-      name: line.product.name,
-      price: line.product.price,
-      qty: line.qty,
-    })),
-  )
+  adminOrders.createFromCart(lines)
+  for (const line of lines) adminCatalog.adjustStock(line.productId, -line.qty, 'sale')
   cart.clear()
   paying.value = false
   payShow.value = true

@@ -8,8 +8,8 @@ import OIcon from '@/components/oil-ui/OIcon.vue'
 import RoleSwitcher from '@/components/RoleSwitcher.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import ProductCard from '@/components/shop/ProductCard.vue'
-import { getVisibleProducts } from '@/catalog/admin/read'
-import { banner, getProduct } from '@/catalog/shop'
+import { getAdminProduct, getVisibleProducts } from '@/catalog/admin/read'
+import { banner } from '@/catalog/shop'
 import { useAppRoleStore } from '@/stores/appRole'
 import { useCartStore } from '@/stores/cart'
 import { bump, flyToCart } from '@/utils/motion'
@@ -43,7 +43,7 @@ function startSealPress() {
   sealTimer = window.setTimeout(() => {
     role.choose('merchant')
     showToast({ text: '进入商家中心' })
-    void router.push('/admin/login')
+    void router.push('/admin/dashboard')
   }, 800)
 }
 
@@ -54,8 +54,18 @@ function cancelSealPress() {
 onBeforeUnmount(() => window.clearTimeout(sealTimer))
 
 function addToCart(payload: { id: number; from: HTMLElement }) {
-  const product = getProduct(payload.id)
+  const product = getAdminProduct(payload.id)
   if (!product) return
+  // 库存联动：售罄不能加购，数量不超过商家端设置的库存
+  if (product.stock <= 0) {
+    showToast({ text: '这款已经售罄了' })
+    return
+  }
+  const inCart = cart.lines.find((line) => line.id === product.id)?.qty ?? 0
+  if (inCart >= product.stock) {
+    showToast({ text: `库存仅剩 ${product.stock} 件` })
+    return
+  }
   cart.add(product)
   if (cartAnchor.value) {
     flyToCart(payload.from, cartAnchor.value, product.image, () =>
@@ -146,7 +156,7 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
       <div class="settings">
         <h2 class="settings__title">设置</h2>
         <RoleSwitcher />
-        <p class="settings__ver">茶承 TeaLegacy · 离线演示 v1.0.1</p>
+        <p class="settings__ver">茶承 TeaLegacy · 离线演示 v1.1.0</p>
       </div>
     </ODialog>
 </template>

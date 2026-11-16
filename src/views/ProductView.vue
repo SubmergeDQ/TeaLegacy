@@ -50,10 +50,21 @@ function openCart() {
 }
 
 function addToCart() {
-  if (!product.value) return
-  cart.add(product.value)
+  const value = product.value
+  if (!value) return
+  // 与商家端库存联动：售罄不可加购，购物车里的数量也不能超过库存
+  if (value.stock <= 0) {
+    showToast({ text: '这款已经售罄了' })
+    return
+  }
+  const inCart = cart.lines.find((line) => line.id === value.id)?.qty ?? 0
+  if (inCart >= value.stock) {
+    showToast({ text: `库存仅剩 ${value.stock} 件` })
+    return
+  }
+  cart.add(value)
   showToast({
-    text: `已加购「${product.value.name}」`,
+    text: `已加购「${value.name}」`,
     action: { text: '去看看', handler: openCart },
   })
 }
@@ -82,6 +93,12 @@ function addToCart() {
         <i>¥</i><b>{{ formatPrice(product.price) }}</b>
         <del v-if="product.originalPrice">¥{{ formatPrice(product.originalPrice) }}</del>
       </div>
+      <p
+        class="pd__stock"
+        :class="{ 'is-low': product.stock > 0 && product.lowStock, 'is-out': product.stock <= 0 }"
+      >
+        {{ product.stock <= 0 ? '暂时售罄' : product.lowStock ? `仅剩 ${product.stock} 件` : `库存 ${product.stock} 件` }}
+      </p>
     </div>
 
     <!-- 引言：一句话来历，只能在这一件上读到 -->
@@ -117,7 +134,14 @@ function addToCart() {
       <span class="pd__bar-price">
         <i>¥</i><b>{{ formatPrice(product.price) }}</b>
       </span>
-      <OButton size="lg" class="pd__bar-btn" @click="addToCart">加入购物车</OButton>
+      <OButton
+        size="lg"
+        class="pd__bar-btn"
+        :disabled="product.stock <= 0"
+        @click="addToCart"
+      >
+        {{ product.stock <= 0 ? '已售罄' : '加入购物车' }}
+      </OButton>
     </footer>
   </div>
 </template>
@@ -181,6 +205,22 @@ function addToCart() {
   margin-top: 0.1875rem;
   font-size: 0.8125rem;
   color: var(--o-muted);
+}
+
+// 库存：与商家端实时联动，低库存与售罄用语义色区分
+.pd__stock {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--o-muted);
+
+  &.is-low {
+    color: var(--o-warn);
+  }
+
+  &.is-out {
+    color: var(--o-danger);
+  }
 }
 
 .pd__price {

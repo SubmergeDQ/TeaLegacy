@@ -85,6 +85,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
   z-index: 80;
   display: flex;
   align-items: flex-end;
+  overflow: hidden;
 }
 
 .o-sheet__mask {
@@ -148,27 +149,58 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
   padding-top: 0.75rem;
 }
 
-// 遮罩淡入，面板从底部升起；时长沿用项目状态过渡
-.o-sheet-enter-active,
-.o-sheet-leave-active {
-  transition: opacity var(--o-dur-state) linear;
+// 用 keyframes 而不是 enter-from：动画首帧就锁定在屏幕下方，
+// 避免插入瞬间先按最终位置绘制、再回落的"从上往下闪一下"。
+.o-sheet-enter-active {
+  animation: o-sheet-mask-in var(--o-dur-state) linear both;
 }
 
 .o-sheet-enter-active .o-sheet__panel {
-  transition: transform var(--o-dur-state) var(--o-ease-flow);
+  animation: o-sheet-panel-in var(--o-dur-state) var(--o-ease-flow) both;
+  will-change: transform;
+}
+
+.o-sheet-leave-active {
+  animation: o-sheet-mask-out 180ms linear both;
 }
 
 .o-sheet-leave-active .o-sheet__panel {
-  transition: transform 200ms var(--o-ease-flow);
+  animation: o-sheet-panel-out 200ms var(--o-ease-flow) both;
 }
 
-.o-sheet-enter-from,
-.o-sheet-leave-to {
-  opacity: 0;
+@keyframes o-sheet-mask-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.o-sheet-enter-from .o-sheet__panel,
-.o-sheet-leave-to .o-sheet__panel {
-  transform: translateY(100%);
+@keyframes o-sheet-panel-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes o-sheet-mask-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes o-sheet-panel-out {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
 }
 </style>

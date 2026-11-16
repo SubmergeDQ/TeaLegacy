@@ -15,12 +15,6 @@ const base = { admin: true, section: 'admin' }
 
 export const merchantRoutes: RouteRecordRaw[] = [
   {
-    path: '/admin/login',
-    name: 'admin-login',
-    component: () => import('@/merchant/views/AdminLoginView.vue'),
-    meta: { ...base, depth: 1, title: '商家登录' },
-  },
-  {
     path: '/admin',
     redirect: '/admin/dashboard',
     meta: { ...base, depth: 1 },

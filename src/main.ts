@@ -10,7 +10,18 @@ import '@fontsource-variable/noto-serif-sc'
 import App from './App.vue'
 import router from './router'
 import OilUI from './components/oil-ui'
+import { ADMIN_STORAGE_KEYS } from './catalog/admin/storage'
 import './styles/base.scss'
+
+// 每次冷启动都重置演示数据：只删覆盖层键，store 首次创建时自动回落到默认值，
+// 不会把 Mock/订单模块带进主包。
+for (const key of Object.values(ADMIN_STORAGE_KEYS)) {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // 隐私模式等存储不可用时忽略
+  }
+}
 
 createApp(App).use(createPinia()).use(router).use(OilUI).mount('#app')
 

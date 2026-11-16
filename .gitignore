@@ -34,3 +34,5 @@ pnpm-debug.log*
 .audit/
 .trae/
 .gh/
+.oil-ui/
+.trae-html-share-packages/

@@ -15,14 +15,12 @@ import {
   useAdminCatalogStore,
   useAdminShopStore,
 } from '@/catalog/admin'
-import { useAdminAuthStore } from '@/merchant/stores/adminAuth'
 import RoleSwitcher from '@/components/RoleSwitcher.vue'
 
-// 我的：店铺资料、营业与通知开关、演示数据、身份切换、退出。
+// 我的：店铺资料、营业与通知开关、演示数据、身份切换。
 const router = useRouter()
 const shop = useAdminShopStore()
 const catalog = useAdminCatalogStore()
-const auth = useAdminAuthStore()
 
 const infoOpen = ref(false)
 const resetOpen = ref(false)
@@ -83,12 +81,6 @@ function exportData() {
   link.remove()
   URL.revokeObjectURL(url)
   showToast({ text: '演示数据已导出' })
-}
-
-function logout() {
-  auth.logout()
-  showToast({ text: '已退出商家端' })
-  void router.replace('/admin/login')
 }
 </script>
 
@@ -168,15 +160,6 @@ function logout() {
       <h2 class="mine__section">身份与入口</h2>
       <RoleSwitcher />
     </section>
-
-    <section class="mine__card mine__group">
-      <h2 class="mine__section">关于</h2>
-      <OCell label="版本" value="v1.0.1 · 商家端 P0" />
-      <OCell label="技术栈" value="Vue 3 · Vite 7 · Oil UI" />
-      <OCell label="数据说明" value="全部离线演示" />
-    </section>
-
-    <OButton type="outline" block class="mine__logout" @click="logout">退出登录</OButton>
 
     <OSheet v-model="infoOpen" title="店铺信息">
       <div class="mine__form">
@@ -354,10 +337,6 @@ function logout() {
   &:focus {
     border-color: var(--o-ink);
   }
-}
-
-.mine__logout {
-  margin-top: 0.5rem;
 }
 
 .mine__dialog {

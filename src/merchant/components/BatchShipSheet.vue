@@ -41,11 +41,11 @@ const submitting = ref(false)
 
 function buildRows() {
   const prefix = carrierPrefix(company.value)
-  rows.value = props.orders.map((order, index) => ({
+  rows.value = props.orders.map((order) => ({
     no: order.no,
     buyer: order.buyer.name,
     qty: order.items.reduce((sum, item) => sum + item.qty, 0),
-    value: makeTracking(prefix, index),
+    value: makeTracking(prefix),
     edited: false,
   }))
 }
@@ -63,8 +63,8 @@ watch(
 watch(company, (name) => {
   saveCarrierName(name)
   const prefix = carrierPrefix(name)
-  rows.value.forEach((row, index) => {
-    if (!row.edited) row.value = makeTracking(prefix, index)
+  rows.value.forEach((row) => {
+    if (!row.edited) row.value = makeTracking(prefix)
   })
 })
 

@@ -6,7 +6,7 @@
 
 ---
 
-> **仓库状态**：用户端已实现；商家端方案已定（A 单应用路由分区），**P0 已落地**（登录 / 概览 / 商品列表与编辑 / 订单列表与详情 / 店铺设置，数据层 `src/catalog/admin/`，C 端下单闭环）。
+> **仓库状态**：用户端已实现；商家端方案已定（A 单应用路由分区），**P0 已落地**（概览 / 商品列表与编辑 / 订单列表与详情 / 库存总览 / 店铺设置，数据层 `src/catalog/admin/`，C 端下单闭环；已取消密码登录）。
 > 方案与决策见 [plans/00-方案对比.md](../plans/00-方案对比.md)、[DECISIONS.md](../DECISIONS.md)。
 > **目录以方案 A 为准**：商家端页面落在 `src/merchant/views/*`，路由 `src/merchant/router/index.ts`，
 > 数据层 `src/catalog/admin/*`；本文 4.1–4.3 已按实际实现修订。
@@ -18,7 +18,7 @@
 | 能不能做 | **能，而且成本很低**。现有工程是纯前端 SPA，后台只是再加一棵路由树 |
 | 技术路线 | 同工程内新增 `/admin` 分支 + 独立布局 `AdminLayout`，复用 Oil UI 与设计令牌（**方案 A**） |
 | 新增依赖 | **0 个运行时依赖**。组件扩展现有 Oil UI，图表自绘 SVG |
-| P0 范围 | 登录 + 概览看板 + 商品列表/编辑 + 订单列表/详情 + 店铺设置，共 7 页 |
+| P0 范围 | 概览看板 + 商品列表/编辑 + 订单列表/详情 + 库存总览 + 店铺设置 |
 | 代码量 | 约 **2 500 行**（Vue/TS/SCSS） |
 | 工期 | 熟手 **8.5 人日**；3 天可出"能演示"的裁剪版 |
 | 体积影响 | 主包不变，后台独立懒加载 chunk ≈ **+80 KB（gzip 约 +25 KB）**；不新增字体 |
@@ -64,7 +64,7 @@ CraftMakeView  70.2 kB │ gzip 19.5 kB   ← 已用懒加载，可参考此模�
 | `OTabbar` / `ONavBar` / `OBadge` / `OButton` / `ODialog` / `OToastHost` / `OIcon` / `OStepper` | 12 个后台组件 + 2 个组合式函数（列表/刷新） |
 | 设计令牌、`utils/format.ts`、`utils/motion.ts`（`delay` 模拟接口） | 数据契约、Mock 订单生成器、指标聚合、4 个 Pinia store |
 | `catalog/shop` 的 `products`（只读权威数据） | 商品覆盖层、库存流水、订单状态机 |
-| localStorage 版本键 + 防御式读取范式 | 模拟登录与路由守卫 |
+| localStorage 版本键 + 防御式读取范式 | 身份选择与路由跳转 |
 
 ---
 
@@ -74,7 +74,7 @@ CraftMakeView  70.2 kB │ gzip 19.5 kB   ← 已用懒加载，可参考此模�
 |---|---|---|---|
 | 改动量 | 新增目录为主，改 `App.vue` 3 处、`router` 1 处 | 需重构工程结构、引入 workspace | 无，但主题会漂移 |
 | 主题一致性 | 天然一致（同一套令牌） | 一致（抽 `@tealegacy/ui`） | 差，需手工同步 |
-| 单 APK 双身份 | 支持，路由 + 登录即可 | 需两套构建产物 | 需两个 APK |
+| 单 APK 双身份 | 支持，路由 + 身份选择即可 | 需两套构建产物 | 需两个 APK |
 | 类型共享 | 直接 `@/` 引用 | 需建包与构建编排 | 复制粘贴 |
 | 演示成本 | 最低 | 中 | 低但后续维护差 |
 | 何时选它 | 后台 ≤ 15 页、单团队、以演示为目标 | 后台 > 15 页 / 需要真权限 / 运营要独立发版 | C 端与后台分属不同团队 |
@@ -107,7 +107,7 @@ CraftMakeView  70.2 kB │ gzip 19.5 kB   ← 已用懒加载，可参考此模�
 
 | 编号 | 页面 | 路由 | 优先级 | 说明 | 预估 |
 |---|---|---|---|---|---|
-| A1 | 商家登录 | `/admin/login` | P0 | 本地校验（账号 `tea-admin` / 密码 `123456`），登录态存 `sessionStorage` | 0.3d |
+| A1 | ~~商家登录~~（已取消） | — | — | 选择商家端身份后直接进概览，不再校验账号密码 | — |
 | A2 | 概览看板 | `/admin/dashboard` | P0 | 4 张 KPI 卡 + 7 日趋势折线 + 待发货待办 + 热销 Top5 | 1.2d |
 | A3 | 商品列表 | `/admin/products` | P0 | 搜索、分类/状态筛选、上下架开关、库存角标、低库存预警 | 1.2d |
 | A4 | 商品编辑 | `/admin/products/:id` | P0 | 价格/库存/单位/标签/上下架/specs 动态行/story 多段，带校验 | 1.5d |
@@ -152,11 +152,11 @@ CraftMakeView  70.2 kB │ gzip 19.5 kB   ← 已用懒加载，可参考此模�
 |---|---|---|
 | 改价 | 商城列表/详情价格同步 | 合并读取层 `getAdminProducts()` |
 | 下架 | 商城列表隐藏、详情 404 回商城 | `ShopView` / `ProductView` 改读合并层 |
-| 改库存 | 详情页显示"仅剩 N 件"（可选 P1） | 合并层 |
+| 改库存 | 商城/详情显示实时库存；售罄不可加购；数量不超过库存 | 合并层 |
 | 发货/取消订单 | C 端无订单页，不体现 | 仅后台 |
-| **C 端模拟下单** | 后台订单列表新增一条「待付款」并角标提示 | `CartView` 结算成功时调用 `orderAdmin.createFromCart()`（P1，强烈建议做，闭环感极强） |
+| **C 端模拟下单** | 后台订单列表新增「待发货」，对应库存自动扣减并记 `sale` 流水 | `CartView` 结算时 `createFromCart()` + `adjustStock(-qty, 'sale')` |
 
-> 注意：C 端现有结算只弹「支付成功」并清空购物车，不落订单。P1 只需在 `CartView.vue` 的结算回调里加 3 行，即可让后台"活"起来。
+> 结算按钮的模拟支付成功后立即写订单、扣库存并清空购物车，后台「待发货」与库存同步变化。
 
 ### 3.6 线框（375 宽）
 
@@ -208,12 +208,12 @@ src/
 ├─ main.ts                      ~ 返回键 fallback 按 meta.section 区分两端
 ├─ App.vue                      ~ 按 meta.admin 切换底部 Tab（复用同一套外壳）
 ├─ router/
-│  └─ index.ts                  ~ 追加 merchantRoutes、登录守卫
+│  └─ index.ts                  ~ 追加 merchantRoutes
 ├─ merchant/                    ★ 商家端（M0 骨架已建）
 │  ├─ router/index.ts           + 路由表（全部懒加载）
-│  ├─ views/                    + 登录 / 概览 / 商品 / 商品编辑 / 订单 / 订单详情 / 我的
+│  ├─ views/                    + 概览 / 商品 / 商品编辑 / 订单 / 订单详情 / 库存 / 我的
 │  ├─ components/ComingSoon.vue + 占位卡（M0）
-│  └─ stores/adminAuth.ts       + 模拟登录态（sessionStorage）
+│  ├─ shipment.ts               + 物流公司 / 预填运单号
 ├─ components/oil-ui/           ~ 增量注册（见 4.4），icons.ts 已加 4 个导航图标
 ├─ catalog/admin/               + ★ 数据层（P0 阶段建：types / mock / metrics / 读取层）
 ├─ composables/                 + usePullRefresh / useInfiniteScroll（P0 阶段建）
@@ -227,9 +227,6 @@ src/
 const base = { admin: true, section: 'admin' }
 
 export const merchantRoutes: RouteRecordRaw[] = [
-  { path: '/admin/login', name: 'admin-login',
-    component: () => import('@/merchant/views/AdminLoginView.vue'),
-    meta: { ...base, depth: 1, title: '商家登录' } },
   { path: '/admin', redirect: '/admin/dashboard', meta: { ...base, depth: 1 } },
   { path: '/admin/dashboard', ... meta: { tab: 'dashboard', depth: 1 } },
   { path: '/admin/products',  ... meta: { tab: 'products', depth: 1 } },
@@ -239,26 +236,29 @@ export const merchantRoutes: RouteRecordRaw[] = [
   { path: '/admin/orders',    ... meta: { tab: 'orders', depth: 1 } },
   { path: '/admin/orders/:no', meta: { ...base, depth: 2 } },
   { path: '/admin/shop',      ... meta: { tab: 'shop', depth: 1 } },
+  { path: '/admin/inventory',
+    component: () => import('@/merchant/views/AdminInventoryView.vue'),
+    meta: { ...base, depth: 2 } },
 ]
 ```
 
-`src/router/index.ts` 里把 `...merchantRoutes` 插在兜底路由之前；`beforeEach` 做登录守卫（未登录跳 `/admin/login?redirect=…`，已登录访问登录页跳概览）。
+`src/router/index.ts` 里把 `...merchantRoutes` 插在兜底路由之前；商家端不再有登录守卫，选择身份后直接进入概览。
 
 **对现有代码的实际改动**：
 
 | 位置 | 改动 |
 |---|---|
 | `App.vue` | 新增 `userTabs` / `merchantTabs`，`tabItems` 按 `meta.admin` 切换；`activeTab` setter 区分两端路径 |
-| `router/index.ts` | 追加 `...merchantRoutes` + 登录守卫（约 20 行） |
+| `router/index.ts` | 追加 `...merchantRoutes`（约 5 行） |
 | `main.ts` | 返回键 fallback 按 `meta.section` 回 `/admin/dashboard` 或 `/craft` |
-| `views/ShopView.vue` | 品牌区「普」印改为按钮，长按 800ms 进 `/admin/login`（演示隐藏入口） |
+| `views/ShopView.vue` | 品牌区「普」印改为按钮，长按 800ms 进 `/admin/dashboard`（演示隐藏入口） |
 
 > 原设计计划独立 `AdminLayout` + 自绘 TabBar；M0 实现改为**复用 `App.vue` 外壳**：商家端只是另一组一级 Tab（`meta.tab` 语义相同），转场、滚动记忆、Toast、返回键全部沿用，少一层嵌套滚动容器。将来商家端需要自己的顶栏或侧滑时再抽 `AdminLayout`。
 
 ### 4.3 外壳与导航（M0 实际）
 
 - 底部导航复用 `OTabbar`：概览 `chart` / 商品 `box` / 订单 `receipt` / 我的 `store`（图标已加进 `icons.ts`）。
-- 登录页无 `meta.tab`，不显示底部导航；二级页 `meta.depth: 2` 全屏 + 返回栏（占位页用 `ONavBar`）。
+- 二级页 `meta.depth: 2` 全屏 + 返回栏（占位页用 `ONavBar`）。
 - 原生返回键：`meta.depth > 1` 回上一页，一级页退出；`/admin/*` 的 fallback 回 `/admin/dashboard`。
 - 滚动位置与页面转场直接沿用 `App.vue` 现有逻辑，无需额外代码。
 
@@ -269,9 +269,9 @@ export const merchantRoutes: RouteRecordRaw[] = [
 | 每次启动 `/welcome` | 选择用户端 / 商家端，写 `tea-legacy.app.role.session.v1`（sessionStorage，关闭应用失效） |
 | 用户端商城页齿轮 → 设置 | `RoleSwitcher` 面板：进入商家端 / 重新选择身份 |
 | 商家端「我的」页 | 同一个 `RoleSwitcher`：切换回用户端 / 重新选择身份 |
-| 商城页「普」印长按 800ms | 快捷入口：置身份为商家端并跳登录 |
+| 商城页「普」印长按 800ms | 快捷入口：置身份为商家端并跳概览 |
 
-根路由 `/` 按当前会话身份重定向：`merchant` → 概览（未登录则登录页）、`user` → `/craft`、未选择 → `/welcome`。
+根路由 `/` 按当前会话身份重定向：`merchant` → `/admin/dashboard`、`user` → `/craft`、未选择 → `/welcome`。
 
 ### 4.4 组件扩展清单（Oil UI Admin 增量）
 
@@ -433,7 +433,7 @@ export interface TopProduct { productId: number; name: string; qty: number; amou
 | `tea-legacy.admin.orders.v1` | `Order[]` | Mock 初始单 + C 端流入单 |
 | `tea-legacy.admin.stocklog.v1` | `StockLog[]`（保留最近 100 条） | 库存流水 |
 | `tea-legacy.admin.shop.v1` | `ShopProfile` | 店铺设置 |
-| `tea-legacy.admin.session.v1` | `{ at: number }`（sessionStorage） | 登录态 |
+| `tea-legacy.admin.shipcarrier.v1` | 上次使用的物流公司 | 连续/批量发货预选 |
 
 - 沿用现有范式：`load()` 里 `try/catch` + 字段校验 + 非法回退默认值。
 - 提供 `resetAdminData()`（设置页 A7）一键清空以上 4 个键并重新生成 Mock，演示前可恢复初始状态。
@@ -504,9 +504,9 @@ $o-info:    #4a6b73;  // 中性说明
 
 **单 APK 双身份**（推荐演示用）：
 
-- C 端入口：商城页右上角「承」印章 **长按 800ms** → `/admin/login`（隐藏入口，不破坏 C 端观感）；同时在商城页脚加一行小字「商家入口」，方便演示时直接找到。
-- 登录页：账号 `tea-admin` / 密码 `123456`，校验通过写 `sessionStorage` 后跳概览；错误抖动提示。
-- 可选环境变量：`VITE_ENTRY=admin` 时 `/` 重定向到 `/admin/login`，配合 `vite build --mode admin` 出"商家版"包（同一份代码，两个产物）。
+- C 端入口：商城页右上角「承」印章 **长按 800ms** → `/admin/dashboard`（隐藏入口，不破坏 C 端观感）；同时在商城页脚加一行小字「商家入口」，方便演示时直接找到。
+- 无密码进入：选择商家端身份即写 sessionStorage 并跳概览，不再有登录页与账号校验。
+- 可选环境变量：`VITE_ENTRY=admin` 时 `/` 重定向到 `/admin/dashboard`，配合 `vite build --mode admin` 出"商家版"包（同一份代码，两个产物）。
 
 构建命令不变：
 
@@ -542,11 +542,9 @@ Capacitor 配置无需改动；后台页面全部懒加载，C 端首屏无额�
 
 ## 5. 页面规格（P0）
 
-### A1 商家登录
-- 目标：拦住非演示路径，同时给出"演示账号"提示。
-- 布局：品牌区（茶承 · 商家中心 / 衬线副标题）→ 账号 → 密码 → 主按钮 → 底部「演示账号：tea-admin / 123456」小字。
-- 交互：空值校验、错误抖动 + Toast、成功跳 `redirect ?? /admin/dashboard`、登录中按钮 loading。
-- 验收：错误密码不进入；登录后刷新页面仍在（sessionStorage）；返回键回 C 端商城而非退出 App。
+### A1 商家登录（已取消）
+- 登录页、账号密码校验与路由守卫已移除；选择商家端身份后直接进入概览。
+- 「我的」页保留身份切换与回到用户端。
 
 ### A2 概览看板
 - 数据：`computeKpi(orders, now)` + `computeTrend` + `computeTop`。
@@ -580,8 +578,8 @@ Capacitor 配置无需改动；后台页面全部懒加载，C 端首屏无额�
 - 验收：发货后列表状态同步；运单号可复制；时间轴顺序正确。
 
 ### A7 店铺设置
-- 分组：店铺信息（名称/简介，编辑弹 `OSheet`）、营业状态（`OSwitch`，关闭后 C 端显示"休息中"角标，P1）、通知开关 ×2（仅本地开关 + Toast）、演示数据（重置 / 导出 JSON）、关于（版本 v1.0.1、技术栈、进入 C 端）、退出登录（二次确认 → 清 sessionStorage → 回登录页）。
-- 验收：重置后订单回到 48 单初始态、商品价格恢复默认；退出后无法直达后台路由。
+- 分组：店铺信息（名称/简介，编辑弹 `OSheet`）、营业状态（`OSwitch`，关闭后 C 端显示"休息中"角标，P1）、通知开关 ×2（仅本地开关 + Toast）、演示数据（重置 / 导出 JSON）、身份与入口（切换 C 端 / 重新选择身份）。无密码、无退出登录、无「关于」板块。
+- 验收：重置后订单回到 48 单初始态、商品价格恢复默认；每次冷启动自动重置演示数据。
 
 ---
 
@@ -589,7 +587,7 @@ Capacitor 配置无需改动；后台页面全部懒加载，C 端首屏无额�
 
 | 里程碑 | 内容 | 交付物 | 人日 |
 |---|---|---|---|
-| **M0 骨架** | 路由分支、AdminLayout、守卫、登录页、令牌补色 | 能进 `/admin` 看到空壳 + 4 Tab | 0.8 |
+| **M0 骨架** | 路由分支、AdminLayout、身份入口、令牌补色 | 能进 `/admin` 看到空壳 + 4 Tab | 0.8 |
 | **M1 数据层** | types、Mock 订单生成器、覆盖层、指标纯函数、3 个 store、持久化 | 控制台可跑通聚合数字；`metrics` 单测 | 1.2 |
 | **M2 组件** | 12 组件 + 2 composable + 10 图标 | 组件在演示页可见、样式token化 | 1.6 |
 | **M3 页面** | A2–A7 七个页面 | 完整可点流程 | 2.8 |
@@ -605,13 +603,12 @@ Capacitor 配置无需改动；后台页面全部懒加载，C 端首屏无额�
 ## 7. 验收清单
 
 **功能**
-- [ ] 未登录访问 `/admin/*` 跳登录，登录后可回原目标页
+- [ ] 选商家端身份直接进概览，直达 `/admin/*` 不被拦截
 - [ ] 概览 4 个 KPI 与订单数据一致（抽样 3 单手工核对）
-- [ ] 商品改价/改库存/上下架 → 刷新后仍生效，C 端同步
+- [ ] 商品改价/改库存/上下架 → 本次会话内 C 端同步；重启应用后回到默认演示数据
 - [ ] 订单筛选 6 个状态计数与列表一致；分页无重复/无丢失
 - [ ] 发货后状态、时间轴、待办数量三方一致
-- [ ] 重置演示数据 → 回到初始 48 单
-- [ ] 退出登录后直达后台路由被拦截
+- [ ] 重置演示数据 → 回到初始 48 单；冷启动也会自动重置
 
 **数据**
 - [ ] 同一 seed 生成订单可复现；今日订单数 > 0

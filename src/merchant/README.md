@@ -7,13 +7,12 @@
 
 | 方式 | 说明 |
 |---|---|
-| 每次启动 | 身份选择页 `/welcome` → 选「商家端」（存 sessionStorage，关闭应用后需重新选） |
-| 设置切换 | 用户端商城页齿轮 → 设置 → 进入商家端；商家端「我的」页可切回用户端 |
+| 每次启动 | 身份选择页 `/welcome` → 选「商家端」直接进概览（存 sessionStorage，关闭应用后需重新选） |
+| 设置切换 | 用户端商城页设置 → 进入商家端；商家端「我的」页可切回用户端 |
 | 快捷入口 | 用户端商城页「普」印**长按 800ms** |
-| 直接访问 | `#/welcome`、`#/admin/login`（Web / 调试） |
-| 演示账号 | `tea-admin` / `123456`（登录页有「填入演示账号」按钮） |
+| 直接访问 | `#/welcome`、`#/admin/dashboard`（Web / 调试） |
 
-登录态存 `sessionStorage`（键 `tea-legacy.admin.session.v1`），关闭应用即失效；登录成功会把本次会话身份置为商家端。
+商家端不再校验账号密码；进入商家端会把本次会话身份置为商家端。
 
 ## 已实现（P0）
 
@@ -25,7 +24,7 @@
 | 订单 `/admin/orders` | 6 段状态筛选（3×2 均分）、每页 10 条上拉加载与骨架、卡上直接发货、多选批量发货、已发货卡直出物流 |
 | 订单详情 `/admin/orders/:no` | 商品行与金额、收货信息复制、物流、备注编辑、时间轴、发货/取消 |
 | 库存总览 `/admin/inventory` | 在售/低库存汇总、低库存优先排序、行内入库/出库（弹层填数量）、最近流水 |
-| 我的 `/admin/shop` | 店铺资料与营业状态、库存管理入口、通知开关、重置/导出演示数据、身份切换、退出登录 |
+| 我的 `/admin/shop` | 店铺资料与营业状态、库存管理入口、通知开关、重置/导出演示数据、身份切换 |
 
 数据全部由 `src/catalog/admin/` 提供：只读源 + 覆盖层（改价/库存/上下架即时同步 C 端）、确定性 Mock 48 单、指标纯函数、三个 Pinia store。
 
@@ -50,11 +49,10 @@ src/
 │                               OSheet/OEmpty/OTimeline/OFormItem + charts/OChartLine
 └─ merchant/
    ├─ router/index.ts           /admin/* 全部懒加载
-   ├─ stores/adminAuth.ts       模拟登录态
    ├─ shipment.ts               物流公司、上次选择、预填运单号
    ├─ components/ShipSheet.vue  发货弹层（列表与详情共用）
    ├─ components/BatchShipSheet.vue 批量发货弹层
-   └─ views/                    登录 + 7 个页面
+   └─ views/                    7 个页面
 ```
 
 ## 与用户端的边界
@@ -71,9 +69,9 @@ src/
 | `tea-legacy.admin.orders.v1` | 订单（Mock 初始 + C 端流入） |
 | `tea-legacy.admin.stocklog.v1` | 库存流水（保留 100 条） |
 | `tea-legacy.admin.shop.v1` | 店铺设置 |
-| `tea-legacy.admin.session.v1` | 登录态（sessionStorage） |
+| `tea-legacy.admin.shipcarrier.v1` | 上次使用的物流公司 |
 
-「我的 → 重置演示数据」会清空以上四个 localStorage 键并重新生成 48 单。
+「我的 → 重置演示数据」会清空以上四个业务键并重新生成 48 单（物流公司偏好保留）；应用每次冷启动也会自动清空这四个键。
 
 ## 下一步（未做）
 

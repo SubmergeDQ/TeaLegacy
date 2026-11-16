@@ -7,7 +7,13 @@ import OSegmented from '@/components/oil-ui/OSegmented.vue'
 import OSheet from '@/components/oil-ui/OSheet.vue'
 import { showToast } from '@/components/oil-ui/toast'
 import { useAdminOrdersStore } from '@/catalog/admin'
-import { CARRIERS, loadCarrierName, saveCarrierName } from '@/merchant/shipment'
+import {
+  CARRIERS,
+  carrierPrefix,
+  loadCarrierName,
+  makeTracking,
+  saveCarrierName,
+} from '@/merchant/shipment'
 import { formatPrice } from '@/utils/format'
 
 // 发货：物流公司 + 运单号，成功后写入时间轴。
@@ -25,6 +31,8 @@ const companyOptions = CARRIERS.map((item) => ({ value: item.name, label: item.n
 
 const company = ref(loadCarrierName())
 const trackingNo = ref('')
+// 自动生成的号码：用户没改过时，切换物流公司会跟着换前缀
+const autoNo = ref('')
 const error = ref('')
 const submitting = ref(false)
 
@@ -36,13 +44,21 @@ const totalQty = computed(
 
 const canSubmit = computed(() => trackingNo.value.trim().length > 0)
 
-watch(company, (value) => saveCarrierName(value))
+watch(company, (value) => {
+  saveCarrierName(value)
+  if (trackingNo.value === autoNo.value) {
+    autoNo.value = makeTracking(carrierPrefix(value))
+    trackingNo.value = autoNo.value
+  }
+})
 
 watch(
   () => props.modelValue,
   (show) => {
     if (!show) return
-    trackingNo.value = ''
+    company.value = loadCarrierName()
+    autoNo.value = makeTracking(carrierPrefix(company.value))
+    trackingNo.value = autoNo.value
     error.value = ''
   },
 )

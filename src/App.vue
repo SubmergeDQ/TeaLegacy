@@ -5,9 +5,25 @@ import { useRoute, useRouter } from 'vue-router'
 import OTabbar, { type TabItem } from '@/components/oil-ui/OTabbar.vue'
 import OToastHost from '@/components/oil-ui/OToastHost.vue'
 import { hideToast } from '@/components/oil-ui/toast'
+import { useAppRoleStore } from '@/stores/appRole'
 
 const route = useRoute()
 const router = useRouter()
+const role = useAppRoleStore()
+
+// 身份跟随路由：隐藏入口、直接访问 /admin/* 或旧会话进来时，
+// 「我的 / 设置」里的「当前身份」也显示正确的一端。
+watch(
+  () => route.meta.admin,
+  (admin) => {
+    if (admin === true) {
+      if (role.current !== 'merchant') role.choose('merchant')
+    } else if (route.path !== '/welcome' && role.current !== 'user') {
+      role.choose('user')
+    }
+  },
+  { immediate: true },
+)
 
 // 用户端与商家端各有一组一级 Tab，共用同一套外壳。
 // 方案 A：商家端只是同一应用里的另一棵路由树（/admin/*）。
@@ -69,7 +85,7 @@ watch(
 
 <template>
   <div class="app-shell">
-    <main ref="bodyEl" class="app-body">
+    <main ref="bodyEl" class="app-body" :class="{ 'app-body--tab': showTabbar }">
       <router-view v-slot="{ Component }">
         <transition :name="transitionName">
           <keep-alive include="ShopView,CraftSelectView">
@@ -79,7 +95,9 @@ watch(
       </router-view>
     </main>
 
-    <OTabbar v-if="showTabbar" v-model="activeTab" :items="tabItems" />
+    <div v-if="showTabbar" class="app-tabbar">
+      <OTabbar v-model="activeTab" :items="tabItems" />
+    </div>
     <OToastHost :top-offset="toastOffset" />
   </div>
 </template>
@@ -99,60 +117,81 @@ watch(
 .app-body {
   position: relative;
   flex: 1;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
+// TabBar 用悬浮层而不是 flex 兄弟节点：进出二级页时外壳高度不变，
+// 页面不会在转场瞬间被重新排版（那是主要的一下"顿"感）。
+// 一级页用 padding-bottom 把内容让出来，视觉与原来一致。
+.app-body--tab {
+  padding-bottom: calc(3.25rem + var(--o-safe-bottom));
+}
+
+.app-tabbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+}
+
 // —— 页面转场（交叠式：离场页绝对定位，避免布局跳动）——
+// 只动 transform：整页 opacity 会多一层全屏合成，低端机容易掉帧。
+// 进入页必须自带纸色底：否则滑动过程中会透出下面一张页面（一级页的背景）。
 .page-forward-enter-active,
 .page-back-enter-active {
-  transition:
-    transform 320ms var(--o-ease-flow),
-    opacity 320ms var(--o-ease-flow);
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  background: var(--o-paper);
+  transition: transform 280ms var(--o-ease-flow);
+  will-change: transform;
 }
 
 .page-forward-leave-active,
 .page-back-leave-active {
   position: absolute;
   inset: 0;
-  transition:
-    transform 240ms var(--o-ease-flow),
-    opacity 240ms linear;
+  z-index: 1;
+  transition: transform 200ms var(--o-ease-flow);
+  will-change: transform;
 }
 
 .page-forward-enter-from {
-  transform: translateX(12%);
-  opacity: 0;
+  transform: translate3d(10%, 0, 0);
 }
 
 .page-forward-leave-to {
-  transform: translateX(-6%);
-  opacity: 0;
+  transform: translate3d(-4%, 0, 0);
 }
 
 .page-back-enter-from {
-  transform: translateX(-8%);
-  opacity: 0;
+  transform: translate3d(-6%, 0, 0);
 }
 
 .page-back-leave-to {
-  transform: translateX(12%);
-  opacity: 0;
+  transform: translate3d(10%, 0, 0);
 }
 
-.page-fade-enter-active,
+// Tab 之间用「纸面淡入」而不是交叉淡化：
+// 两个整页同时半透明会互相透出（文字重影、图片叠色）。
+// 旧页立即隐藏，新页自带纸色底从纸面淡入，任一帧都不会有两页叠加。
+.page-fade-enter-active {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  background: var(--o-paper);
+  transition: opacity 140ms linear;
+}
+
 .page-fade-leave-active {
-  transition: opacity 180ms linear;
+  display: none;
 }
 
-.page-fade-leave-active {
-  position: absolute;
-  inset: 0;
-}
-
-.page-fade-enter-from,
-.page-fade-leave-to {
+.page-fade-enter-from {
   opacity: 0;
 }
 </style>

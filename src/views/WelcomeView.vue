@@ -2,22 +2,16 @@
 import { useRouter } from 'vue-router'
 
 import OIcon from '@/components/oil-ui/OIcon.vue'
-import { useAdminAuthStore } from '@/merchant/stores/adminAuth'
 import { useAppRoleStore, type AppRole } from '@/stores/appRole'
 
 // 首次启动的身份选择页：用户端 / 商家端。
 // 选择后写入 localStorage，之后可在设置里切换。
 const router = useRouter()
 const role = useAppRoleStore()
-const auth = useAdminAuthStore()
 
 function enter(target: AppRole) {
   role.choose(target)
-  if (target === 'merchant') {
-    void router.replace(auth.logged ? '/admin/dashboard' : '/admin/login')
-  } else {
-    void router.replace('/craft')
-  }
+  void router.replace(target === 'merchant' ? '/admin/dashboard' : '/craft')
 }
 </script>
 

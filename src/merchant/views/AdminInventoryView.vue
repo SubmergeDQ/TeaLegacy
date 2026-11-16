@@ -320,6 +320,9 @@ function goBack() {
   flex: 1;
   min-width: 0;
   display: grid;
+  // 单列显式压到容器宽度：否则 auto 列会按 max-content 撑开，
+  // 长商品名 + 标签会越过右边界、压到入库/出库按钮上
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.1875rem;
 }
 
@@ -327,9 +330,11 @@ function goBack() {
   display: flex;
   align-items: center;
   gap: 0.375rem;
+  min-width: 0;
 }
 
 .inv__name {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;

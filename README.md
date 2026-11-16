@@ -21,9 +21,9 @@ TeaLegacy/
 │  ├─ components/oil-ui/        Oil UI 组件（商家端增量：OTag/OSwitch/OSheet/图表等）
 │  └─ merchant/                 ★ 商家端（方案 A：同一应用内的路由分区）
 │     ├─ router/                路由表 /admin/*（全部懒加载）
-│     ├─ stores/adminAuth.ts    模拟登录态
-│     ├─ components/            ShipSheet 等商家端组件
-│     └─ views/                 登录 + 概览 / 商品 / 商品编辑 / 订单 / 详情 / 我的
+│     ├─ shipment.ts            物流公司 / 预填运单号
+│     ├─ components/            ShipSheet / BatchShipSheet 等商家端组件
+│     └─ views/                 概览 / 商品 / 商品编辑 / 订单 / 详情 / 库存 / 我的
 ├─ docs/
 │  ├─ README.md                 文档索引
 │  ├─ DEVELOPMENT.md            开发指南（新设备上手 / 目录 / P0 顺序 / 约定）
@@ -43,7 +43,7 @@ TeaLegacy/
 
 | 部分 | 状态 | 说明 |
 |---|---|---|
-| 用户端 | ✅ 已实现 | 7 款普洱制茶互动 + 商城 + 购物车，可打 APK（v1.0.1） |
+| 用户端 | ✅ 已实现 | 7 款普洱制茶互动 + 商城 + 购物车，可打 APK（v1.1.0） |
 | 身份 | ✅ 已实现 | 首次启动选择用户端 / 商家端；两端设置里可随时切换 |
 | 商家端 | ✅ P0 已落地 | 概览看板 / 商品列表与编辑 / 订单列表与详情（发货、取消、备注）/ 店铺设置；Mock 数据层 + C 端下单闭环 |
 | 文档 | ✅ 已就绪 | 架构说明 + 开发文档 + 方案定稿 |
@@ -51,10 +51,10 @@ TeaLegacy/
 ## 身份与入口
 
 - **每次启动**：先进入身份选择页，选「用户端」或「商家端」；本次会话内有效（sessionStorage），关闭应用后下次重新选择。
-- **随时切换**：用户端商城页右上角**齿轮 → 设置 → 进入商家端 / 重新选择身份**；商家端「我的」页有同样的切换面板。
+- **随时切换**：用户端商城页右上角**设置 → 进入商家端 / 重新选择身份**；商家端「我的」页有同样的切换面板。
 - **快捷入口**：商城页「普」印**长按 800ms** 直接进商家端（演示用）。
-- **商家端登录**：`tea-admin` / `123456`（登录页有「填入演示账号」按钮）；登录态存 sessionStorage，关闭应用即失效。
-- **直接访问**：`#/welcome`、`#/admin/login`（Web / 调试）。
+- **无密码登录**：选择「商家端」或切换身份后直接进入概览，不再输入账号密码。
+- **直接访问**：`#/welcome`、`#/admin/dashboard`（Web / 调试）。
 
 ## 已定方案（2026-11-16）
 
@@ -63,7 +63,7 @@ TeaLegacy/
 | D-001 | 落地方式 | **A 单应用 + 路由分区**（`/admin/*` + `src/merchant/`） |
 | D-002 | UI 组件 | 扩展内置 Oil UI（不引第三方） |
 | D-003 | 图表 | 自绘 SVG（折线/柱/环） |
-| D-004 | 分发 | 单 APK 双身份（隐藏入口 + 模拟登录） |
+| D-004 | 分发 | 单 APK 双身份（隐藏入口 + 无密码进入） |
 
 方案对比与 B/C/D 的迁移路径保留在 [docs/plans/](./docs/plans/)，供后续复盘；决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)。
 
@@ -71,7 +71,7 @@ TeaLegacy/
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173   （商家端加 #/admin/login）
+npm run dev        # http://localhost:5173   （商家端加 #/admin/dashboard）
 npm run typecheck  # vue-tsc 类型检查
 npm run build      # 类型检查 + 生产构建（dist/）
 ```

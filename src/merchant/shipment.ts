@@ -40,12 +40,10 @@ export function saveCarrierName(name: string): void {
 }
 
 /**
- * 批量发货时的预填运单号：前缀 + 日期 + 时分 + 序号，
- * 16 位字母数字，满足 8–20 位校验；同一分钟内按序号区分。
+ * 演示运单号：字母前缀 + 12 位随机数字（16 位，满足 8–20 位校验）。
+ * 每次打开发货弹层都不同，演示时不会看到一串重复的单号。
  */
-export function makeTracking(prefix: string, index: number, now = Date.now()): string {
-  const d = new Date(now)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const stamp = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}`
-  return `${prefix}${stamp}${pad(index + 1)}`
+export function makeTracking(prefix: string): string {
+  const digits = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('')
+  return `${prefix}${digits}`
 }

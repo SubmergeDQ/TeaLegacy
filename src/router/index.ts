@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import { isAdminSessionActive, useAdminAuthStore } from '@/merchant/stores/adminAuth'
 import { merchantRoutes } from '@/merchant/router'
 import { readStoredRole } from '@/stores/appRole'
 import CraftSelectView from '@/views/CraftSelectView.vue'
@@ -17,9 +16,7 @@ const router = createRouter({
       path: '/',
       redirect: () => {
         const role = readStoredRole()
-        if (role === 'merchant') {
-          return isAdminSessionActive() ? '/admin/dashboard' : '/admin/login'
-        }
+        if (role === 'merchant') return '/admin/dashboard'
         return role === 'user' ? '/craft' : '/welcome'
       },
     },
@@ -63,20 +60,6 @@ const router = createRouter({
     ...merchantRoutes,
     { path: '/:pathMatch(.*)*', redirect: '/craft' },
   ],
-})
-
-// 商家端登录守卫：未登录只能停在 /admin/login；
-// 已登录访问登录页则直接进概览。
-router.beforeEach((to) => {
-  if (to.meta.admin !== true) return
-  const auth = useAdminAuthStore()
-  if (to.name !== 'admin-login' && !auth.logged) {
-    return { name: 'admin-login', query: { redirect: to.fullPath } }
-  }
-  if (to.name === 'admin-login' && auth.logged) {
-    return { name: 'admin-dashboard' }
-  }
-  return
 })
 
 export default router
