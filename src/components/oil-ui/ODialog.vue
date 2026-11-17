@@ -38,14 +38,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <Transition name="o-dialog">
-    <div v-if="modelValue" class="o-dialog">
-      <div class="o-dialog__mask" @click="closeOnMask && close()" />
-      <div ref="card" class="o-dialog__card" role="dialog" aria-modal="true" tabindex="-1">
-        <slot />
+  <Teleport to="#app">
+    <Transition name="o-dialog">
+      <div v-if="modelValue" class="o-dialog">
+        <div class="o-dialog__mask" @click="closeOnMask && close()" />
+        <div ref="card" class="o-dialog__card" role="dialog" aria-modal="true" tabindex="-1">
+          <slot />
+        </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped lang="scss">

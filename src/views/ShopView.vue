@@ -156,7 +156,7 @@ function addToCart(payload: { id: number; from: HTMLElement }) {
       <div class="settings">
         <h2 class="settings__title">设置</h2>
         <RoleSwitcher />
-        <p class="settings__ver">茶承 TeaLegacy · 离线演示 v1.1.0</p>
+        <p class="settings__ver">茶承 TeaLegacy · 离线演示 v1.1.1</p>
       </div>
     </ODialog>
 </template>

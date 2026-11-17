@@ -74,8 +74,8 @@ const hasMore = computed(() => displayed.value.length < filtered.value.length)
 
 const { setSentinel, loading } = useInfiniteScroll(
   async () => {
-    // 演示环境给一次 400ms 的加载感
-    await delay(400)
+    // 只留很短的加载反馈：演示数据是本地的，太快反而像没加载
+    await delay(140)
     visibleCount.value += PAGE_SIZE
   },
   () => hasMore.value,
